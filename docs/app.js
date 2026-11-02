@@ -5,6 +5,8 @@ const PAGES = [
   ["executive", "Executive Overview"], ["amazon", "Amazon Sales"], ["international", "International Sales"], ["products", "Products and Stock"],
   ["pricing", "Marketplace Pricing"], ["expenses", "Expenses and Cash"], ["logistics", "Logistics"], ["notes", "Data Notes"],
 ];
+// Data files carry the same version as the script tag in index.html, so a new release never mixes with cached files
+const VERSION = new URL(document.currentScript.src).searchParams.get("v") || "dev";
 const STATE = { year: "", quarter: "", month: "", segment: "", grain: "Month" };
 let D = null;
 
@@ -491,7 +493,7 @@ const NEEDS_SKU = new Set(["products", "international", "sku"]);
 let skuLoad = null;
 function needSku(name) {
   if (!NEEDS_SKU.has(name) || D.sku) return false;
-  if (!skuLoad) skuLoad = loadJSON("sku.json").then(x => { D.sku = x.sku; D.detail = x.detail; }).catch(err => { skuLoad = null; throw err; });
+  if (!skuLoad) skuLoad = loadJSON(`sku.json?v=${VERSION}`).then(x => { D.sku = x.sku; D.detail = x.detail; }).catch(err => { skuLoad = null; throw err; });
   skuLoad.then(() => render(true), err => { const app = document.getElementById("app"); if (NEEDS_SKU.has(route().name)) app.innerHTML = failure(err); });
   return true;
 }
@@ -547,7 +549,7 @@ async function loadJSON(url, tries = 4) {
 }
 const failure = err => `<p class="loading">The dashboard data could not load (${esc(err.message)}). Check the connection and try again.</p><button class="back" type="button" data-retry>Try again</button>`;
 document.getElementById("app").innerHTML = `<p class="loading" role="status">Loading dashboard</p>`;
-loadJSON("data.json").then(data => {
+loadJSON(`data.json?v=${VERSION}`).then(data => {
   D = data;
   D._ymIndex = {};
   D.months.forEach((m, i) => { D._ymIndex[String(m.ym)] = i; });
