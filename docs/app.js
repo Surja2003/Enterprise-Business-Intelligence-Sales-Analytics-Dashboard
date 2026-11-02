@@ -487,8 +487,21 @@ function route() {
   const parts = location.hash.replace(/^#\/?/, "").split("/");
   return { name: parts[0] || "executive", arg: parts[1] ? decodeURIComponent(parts[1]) : null };
 }
+const NEEDS_SKU = new Set(["products", "international", "sku"]);
+let skuLoad = null;
+function needSku(name) {
+  if (!NEEDS_SKU.has(name) || D.sku) return false;
+  if (!skuLoad) skuLoad = loadJSON("sku.json").then(x => { D.sku = x.sku; D.detail = x.detail; }).catch(err => { skuLoad = null; throw err; });
+  skuLoad.then(() => render(true), err => { const app = document.getElementById("app"); if (NEEDS_SKU.has(route().name)) app.innerHTML = failure(err); });
+  return true;
+}
 function render(keepScroll = false) {
-  const { name, arg } = route(), view = VIEWS[name] || VIEWS.executive, active = name === "sku" ? "products" : name === "marketplace" ? "pricing" : VIEWS[name] ? name : "executive";
+  const { name, arg } = route();
+  if (needSku(name)) {
+    document.getElementById("app").innerHTML = `<p class="loading" role="status">Loading SKU data</p>`;
+    return;
+  }
+  const view = VIEWS[name] || VIEWS.executive, active = name === "sku" ? "products" : name === "marketplace" ? "pricing" : VIEWS[name] ? name : "executive";
   document.getElementById("nav").innerHTML = PAGES.map(([k, l]) => `<a href="#/${k}"${k === active ? ' aria-current="page"' : ""}>${esc(l)}</a>`).join("");
   const y = window.scrollY, app = document.getElementById("app");
   app.innerHTML = view(arg);
@@ -497,6 +510,7 @@ function render(keepScroll = false) {
 }
 function bind() {
   window.addEventListener("hashchange", () => { hideTip(); render(); document.getElementById("app").focus({ preventScroll: true }); });
+  document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) location.reload(); });
   document.addEventListener("change", e => { const k = e.target.dataset && e.target.dataset.filter; if (k) { STATE[k] = e.target.value; render(true); document.getElementById("f-" + k)?.focus(); } });
   document.addEventListener("click", e => {
     const g = e.target.closest("[data-grain]");
@@ -518,11 +532,29 @@ function bind() {
 }
 function hideTip() { const t = document.getElementById("tip"); if (t) t.hidden = true; }
 
-fetch("data.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(data => {
+async function loadJSON(url, tries = 4) {
+  for (let i = 1; ; i += 1) {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 45000);
+    try {
+      const r = await fetch(url, { signal: ctl.signal });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return await r.json();
+    } catch (err) {
+      if (i >= tries) throw err;
+      await new Promise(res => setTimeout(res, 800 * i));
+    } finally { clearTimeout(timer); }
+  }
+}
+const failure = err => `<p class="loading">The dashboard data could not load (${esc(err.message)}). Check the connection and try again.</p><button class="back" type="button" data-retry>Try again</button>`;
+document.getElementById("app").innerHTML = `<p class="loading" role="status">Loading dashboard</p>`;
+loadJSON("data.json").then(data => {
   D = data;
   D._ymIndex = {};
   D.months.forEach((m, i) => { D._ymIndex[String(m.ym)] = i; });
   bind();
   render();
   window.__dash = { D, STATE, period, amz, intl, skuTotals, topSkus, render };
-}).catch(err => { document.getElementById("app").innerHTML = `<p class="loading">The dashboard data could not load (${esc(err.message)}).</p>`; });
+}).catch(err => {
+  document.getElementById("app").innerHTML = failure(err);
+  document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) location.reload(); });
+});

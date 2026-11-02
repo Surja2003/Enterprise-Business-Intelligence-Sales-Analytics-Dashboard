@@ -135,11 +135,26 @@ data = {
     "totals": {k: num(v) if k != "x" else v for k, v in load("totals")[0].items()},
 }
 
-OUT.parent.mkdir(exist_ok=True)
-text = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-OUT.write_text(text, encoding="utf-8")
+# Keep only cities that can reach a Top 10 under some filter choice, so the first download stays small
+city = data["dims"]["city"]
+keep = set()
+for period in period_sets():
+    totals = defaultdict(float)
+    for m, k, s, _ in city["r"]:
+        if m in period: totals[k] += s
+    keep |= set(sorted((k for k in totals if totals[k] > 0), key=lambda k: (-totals[k], city["k"][k]))[:10])
+remap = {old: new for new, old in enumerate(sorted(keep))}
+data["dims"]["city"] = {"k": [city["k"][old] for old in sorted(keep)], "r": [[m, remap[k], s, u] for m, k, s, u in city["r"] if k in remap]}
 
-upper = text.upper()
-leaks = [c for c in ranked if len(c) >= 5 and f'"{c}"' in upper or (len(c) >= 8 and c in upper)]
-print(f"data.json {len(text) // 1024} KB, months {len(months)}, SKUs {len(names)}, SKU detail pages {len(detail)}, customers masked {len(masked)}")
-print("names found in data.json:", leaks[:10] if leaks else "none")
+# SKU tables load only on the pages that use them
+sku_file = {"sku": data.pop("sku"), "detail": data.pop("detail")}
+OUT.parent.mkdir(exist_ok=True)
+leaks = []
+for path, payload in ((OUT, data), (OUT.with_name("sku.json"), sku_file)):
+    text = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    path.write_text(text, encoding="utf-8")
+    upper = text.upper()
+    leaks += [c for c in ranked if len(c) >= 5 and f'"{c}"' in upper or (len(c) >= 8 and c in upper)]
+    print(f"{path.name} {len(text) // 1024} KB")
+print(f"months {len(months)}, SKUs {len(names)}, SKU detail pages {len(detail)}, cities kept {len(keep)}, customers masked {len(masked)}")
+print("names found:", leaks[:10] if leaks else "none")
