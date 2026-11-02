@@ -1,0 +1,187 @@
+table May-2022
+	lineageTag: f70f01b4-dd43-4adc-a2d4-a6948cce36f3
+
+	column index
+		dataType: int64
+		formatString: 0
+		lineageTag: 3e44fc7e-e786-4519-9922-452ccc54ed11
+		summarizeBy: sum
+		sourceColumn: index
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sku
+		dataType: string
+		lineageTag: 6ee16b3b-1895-49b9-a15d-e056f0d50445
+		summarizeBy: none
+		sourceColumn: Sku
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Style Id'
+		dataType: string
+		lineageTag: 3b2695c3-e893-4edf-a1dc-55602b7e2318
+		summarizeBy: none
+		sourceColumn: Style Id
+
+		annotation SummarizationSetBy = Automatic
+
+	column Catalog
+		dataType: string
+		lineageTag: 2debbacd-ec02-43da-a436-c48e0f080cd2
+		summarizeBy: none
+		sourceColumn: Catalog
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 5b4a929a-a92b-481b-980e-f5e5a5f93f82
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Weight
+		dataType: double
+		lineageTag: ad9137ae-ca76-447e-8082-af0144d4a4c8
+		summarizeBy: sum
+		sourceColumn: Weight
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TP
+		dataType: int64
+		formatString: 0
+		lineageTag: 833355a3-8df7-4de8-9642-039275fa88a1
+		summarizeBy: sum
+		sourceColumn: TP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'MRP Old'
+		dataType: int64
+		formatString: 0
+		lineageTag: b49cec95-9ca7-4aee-952f-6f5220bb49f5
+		summarizeBy: sum
+		sourceColumn: MRP Old
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Final MRP Old'
+		dataType: int64
+		formatString: 0
+		lineageTag: 80e6cba5-70cd-4f63-b798-f53953a81516
+		summarizeBy: sum
+		sourceColumn: Final MRP Old
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Ajio MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: bad86b5e-88b6-49f4-86a5-561e393eb11e
+		summarizeBy: sum
+		sourceColumn: Ajio MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Amazon MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: 26914d58-db39-40b6-bcde-6aad74261c04
+		summarizeBy: sum
+		sourceColumn: Amazon MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Amazon FBA MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: d3e20f8d-7cdd-4c5a-a3c1-e6ecf79687b1
+		summarizeBy: sum
+		sourceColumn: Amazon FBA MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Flipkart MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: a06eb8bd-9dbe-45c9-ba51-760bdf2ec613
+		summarizeBy: sum
+		sourceColumn: Flipkart MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Limeroad MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5b0c029f-b1c9-4874-882c-a26b7c28f659
+		summarizeBy: sum
+		sourceColumn: Limeroad MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Myntra MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9f592d43-9b01-41ab-8288-1d70cd8e4546
+		summarizeBy: sum
+		sourceColumn: Myntra MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Paytm MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5d642ea3-d8d7-4cec-8ede-eabfeb99bf4d
+		summarizeBy: sum
+		sourceColumn: Paytm MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Snapdeal MRP'
+		dataType: int64
+		formatString: 0
+		lineageTag: 076115f9-3788-4b13-9dbf-1c9f6c83b75a
+		summarizeBy: sum
+		sourceColumn: Snapdeal MRP
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKU_Key =
+			
+			UPPER(TRIM('May-2022'[Sku] & ""))
+		lineageTag: 80851d07-aa49-4c92-b1e9-6788d8fad592
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition May-2022 = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\May-2022.csv"),[Delimiter=",", Columns=17, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"index", Int64.Type}, {"Sku", type text}, {"Style Id", type text}, {"Catalog", type text}, {"Category", type text}, {"Weight", type number}, {"TP", Int64.Type}, {"MRP Old", Int64.Type}, {"Final MRP Old", Int64.Type}, {"Ajio MRP", Int64.Type}, {"Amazon MRP", Int64.Type}, {"Amazon FBA MRP", Int64.Type}, {"Flipkart MRP", Int64.Type}, {"Limeroad MRP", Int64.Type}, {"Myntra MRP", Int64.Type}, {"Paytm MRP", Int64.Type}, {"Snapdeal MRP", Int64.Type}}),
+				    #"Replaced Errors" = Table.ReplaceErrorValues(#"Changed Type", {{"Snapdeal MRP", null}}),
+				    #"Replaced Errors1" = Table.ReplaceErrorValues(#"Replaced Errors", {{"Paytm MRP", null}}),
+				    #"Replaced Errors2" = Table.ReplaceErrorValues(#"Replaced Errors1", {{"Myntra MRP", null}}),
+				    #"Replaced Errors3" = Table.ReplaceErrorValues(#"Replaced Errors2", {{"Limeroad MRP", null}}),
+				    #"Replaced Errors4" = Table.ReplaceErrorValues(#"Replaced Errors3", {{"Flipkart MRP", null}}),
+				    #"Replaced Errors5" = Table.ReplaceErrorValues(#"Replaced Errors4", {{"Amazon FBA MRP", null}}),
+				    #"Replaced Errors6" = Table.ReplaceErrorValues(#"Replaced Errors5", {{"Amazon MRP", null}}),
+				    #"Replaced Errors7" = Table.ReplaceErrorValues(#"Replaced Errors6", {{"Ajio MRP", null}}),
+				    #"Replaced Errors8" = Table.ReplaceErrorValues(#"Replaced Errors7", {{"Final MRP Old", null}}),
+				    #"Replaced Errors9" = Table.ReplaceErrorValues(#"Replaced Errors8", {{"MRP Old", null}}),
+				    #"Replaced Errors10" = Table.ReplaceErrorValues(#"Replaced Errors9", {{"TP", null}}),
+				    #"Replaced Errors11" = Table.ReplaceErrorValues(#"Replaced Errors10", {{"Weight", null}})
+				in
+				    #"Replaced Errors11"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

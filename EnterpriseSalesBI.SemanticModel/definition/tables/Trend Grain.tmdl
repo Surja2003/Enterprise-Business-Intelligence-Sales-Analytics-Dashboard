@@ -1,0 +1,50 @@
+table 'Trend Grain'
+	lineageTag: 4aee227a-7dad-4343-9515-7e5fb2048fe2
+
+	column 'Trend Grain'
+		lineageTag: fe2fe2d5-c900-439f-b200-3bf8388f6bce
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Trend Grain Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Trend Grain Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Trend Grain Fields'
+		isHidden
+		lineageTag: c294de7a-b934-4230-a145-a024cb0d4796
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Trend Grain Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Trend Grain Order'
+		isHidden
+		formatString: 0
+		lineageTag: 9d7f1c08-5617-4c69-bf03-ca16d4dafacd
+		summarizeBy: none
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Trend Grain' = calculated
+		mode: import
+		source =
+				{
+				    ("Month", NAMEOF('DimDate'[Month Year]), 0),
+				    ("Quarter", NAMEOF('DimDate'[Year Quarter]), 1),
+				    ("Year", NAMEOF('DimDate'[Year]), 2),
+				    ("Day", NAMEOF('DimDate'[Date]), 3)
+				}
+
+	annotation PBI_Id = 23cc9e43f03c45a8ac2df5cd735663f9
+

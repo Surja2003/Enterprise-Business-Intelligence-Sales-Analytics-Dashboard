@@ -1,0 +1,48 @@
+table DimSKU
+	lineageTag: 3580b81b-d82f-462e-b0f8-3c72ec1491b9
+
+	column SKU_Key
+		lineageTag: d92d2a7f-cac4-4a36-9132-0a03e133857a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [SKU_Key]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimSKU = calculated
+		mode: import
+		source =
+				
+				VAR AllSKUs =
+				    UNION(
+				        SELECTCOLUMNS(
+				            'Amazon Sale Report',
+				            "SKU_Key", UPPER(TRIM('Amazon Sale Report'[SKU_Key] & ""))
+				        ),
+				        SELECTCOLUMNS(
+				            'Sale Report',
+				            "SKU_Key", UPPER(TRIM('Sale Report'[SKU_Key] & ""))
+				        ),
+				        SELECTCOLUMNS(
+				            'International sale Report',
+				            "SKU_Key", UPPER(TRIM('International sale Report'[SKU_Key] & ""))
+				        ),
+				        SELECTCOLUMNS(
+				            'May-2022',
+				            "SKU_Key", UPPER(TRIM('May-2022'[Sku] & ""))
+				        ),
+				        SELECTCOLUMNS(
+				            'PL_March_2021',
+				            "SKU_Key", UPPER(TRIM('PL_March_2021'[Sku] & ""))
+				        )
+				    )
+				
+				RETURN
+				    FILTER(
+				        DISTINCT(AllSKUs),
+				        NOT ISBLANK([SKU_Key])
+				            && [SKU_Key] <> ""
+				    )
+
+	annotation PBI_Id = e60a5c739c2443eba154887f48b867bd
+

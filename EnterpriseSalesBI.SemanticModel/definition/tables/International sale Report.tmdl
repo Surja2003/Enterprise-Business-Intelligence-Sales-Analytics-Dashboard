@@ -1,0 +1,204 @@
+table 'International sale Report'
+	lineageTag: 2e948703-81d2-45be-9b9b-d6a1d87b4f36
+
+	column DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e67a6b9c-0b88-406f-9d98-6bf51b78310a
+		summarizeBy: none
+		sourceColumn: DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Months
+		dataType: string
+		lineageTag: ddfc5ce7-0f8b-491b-9e0d-4636d6b0219e
+		summarizeBy: none
+		sourceColumn: Months
+
+		annotation SummarizationSetBy = Automatic
+
+	column CUSTOMER
+		dataType: string
+		lineageTag: 844285f9-7ddc-4634-b82e-c64cb5e4438f
+		summarizeBy: none
+		sourceColumn: CUSTOMER
+
+		annotation SummarizationSetBy = Automatic
+
+	column Style
+		dataType: string
+		lineageTag: a85e08a6-5762-4883-bc4d-402fef736082
+		summarizeBy: none
+		sourceColumn: Style
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKU
+		dataType: string
+		lineageTag: 4b61fa3e-50c1-4ed2-9f1a-8a8eb4ba4225
+		summarizeBy: none
+		sourceColumn: SKU
+
+		annotation SummarizationSetBy = Automatic
+
+	column Size
+		dataType: string
+		lineageTag: 409e284d-157e-41f2-a691-e7a976bf98d9
+		summarizeBy: none
+		sourceColumn: Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column PCS
+		dataType: int64
+		formatString: 0
+		lineageTag: 37f30f3c-53b9-49e2-9682-694fa00b86af
+		summarizeBy: sum
+		sourceColumn: PCS
+
+		annotation SummarizationSetBy = Automatic
+
+	column RATE
+		dataType: double
+		lineageTag: 5a0168ce-aaa1-4037-b20f-b0750768350b
+		summarizeBy: sum
+		sourceColumn: RATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'GROSS AMT'
+		dataType: double
+		lineageTag: f24cc443-f30f-4a71-923b-eec5b14f0acc
+		summarizeBy: sum
+		sourceColumn: GROSS AMT
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Final Size'
+		dataType: string
+		lineageTag: fb27a8d6-972d-4787-8df7-57a07b0057ed
+		summarizeBy: none
+		sourceColumn: Final Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Size Category'
+		dataType: string
+		lineageTag: 5c0c14cd-bb65-46ef-b93a-429fe2e0c47e
+		summarizeBy: none
+		sourceColumn: Size Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Corrected Size'
+		dataType: string
+		lineageTag: 0e0c2222-d72a-4d93-8c0e-a9bca08ae4c0
+		summarizeBy: none
+		sourceColumn: Corrected Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'SKU Size'
+		dataType: string
+		lineageTag: 72edd141-2283-4fdf-aae3-47197a8d6888
+		summarizeBy: none
+		sourceColumn: SKU Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Final Corrected Size'
+		dataType: string
+		lineageTag: 8968216a-0f13-44a8-8768-a5f4d6a01f98
+		summarizeBy: none
+		sourceColumn: Final Corrected Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Final Size Category'
+		dataType: string
+		lineageTag: ca48a662-c2b9-49be-986d-b18226104671
+		summarizeBy: none
+		sourceColumn: Final Size Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Calculated Gross'
+		dataType: double
+		lineageTag: 54583a9f-15af-497c-a3bf-a647421ff07e
+		summarizeBy: none
+		sourceColumn: Calculated Gross
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Amount Difference'
+		dataType: double
+		lineageTag: 5c3ff3e7-b554-42b7-b3a7-511c39dac894
+		summarizeBy: none
+		sourceColumn: Amount Difference
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Difference %'
+		dataType: double
+		lineageTag: 35768957-b161-4e11-8f38-ea25a4a107a8
+		summarizeBy: none
+		sourceColumn: Difference %
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Implied Discount %'
+		dataType: double
+		lineageTag: baf8a2da-7d91-435d-90ac-091076c13055
+		summarizeBy: none
+		sourceColumn: Implied Discount %
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKU_Key
+		dataType: string
+		lineageTag: fc828797-5cdb-45d2-b880-c14dfeefac09
+		summarizeBy: none
+		sourceColumn: SKU_Key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'International sale Report' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\International sale Report.csv"),[Delimiter=",", Columns=10, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Typed Index" = Table.TransformColumnTypes(#"Promoted Headers",{{"index", Int64.Type}}),
+				    // The CSV stacks several exports. Rows 0-10195 and 15892-18634 are the true ledger.
+				    // 10196-15891 repeat 4500-10195 exactly (verified row by row); 18635-19675 are a stray stock list;
+				    // 19676 onward is a re-export with shifted columns, no Size and no Apr-May 2022.
+				    #"Kept Ledger Rows" = Table.SelectRows(#"Typed Index", each [index] <= 10195 or ([index] >= 15892 and [index] <= 18634)),
+				    #"Removed Columns" = Table.RemoveColumns(#"Kept Ledger Rows",{"index"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Columns",{{"DATE", type date}, {"Months", type text}, {"CUSTOMER", type text}, {"Style", type text}, {"SKU", type text}, {"Size", type text}, {"PCS", Int64.Type}, {"RATE", type number}, {"GROSS AMT", type number}}, "en-US"),
+				    #"Cleaned Text" = Table.TransformColumns(#"Changed Type",{{"CUSTOMER", each Text.Upper(Text.Clean(Text.Trim(_))), type text}, {"Style", each Text.Upper(Text.Clean(Text.Trim(_))), type text}, {"SKU", each Text.Upper(Text.Clean(Text.Trim(_))), type text}, {"Size", each Text.Upper(Text.Clean(Text.Trim(_))), type text}, {"Months", each Text.Clean(Text.Trim(_)), type text}}),
+				    ValidSizes = {"XS","S","M","L","XL","XXL","XXXL","4XL","5XL","6XL","FREE"},
+				    #"Added Final Size" = Table.AddColumn(#"Cleaned Text", "Final Size", each [Size], type text),
+				    #"Added Size Category" = Table.AddColumn(#"Added Final Size", "Size Category", each if [Size] = "" then "Blank" else if List.Contains(ValidSizes, [Size]) then "Clothing Size" else "Non-Size Entry", type text),
+				    #"Added Corrected Size" = Table.AddColumn(#"Added Size Category", "Corrected Size", each [Size], type text),
+				    #"Added SKU Size" = Table.AddColumn(#"Added Corrected Size", "SKU Size", each let last = List.Last(Text.Split([SKU], "-")) in if List.Contains(ValidSizes, last) then last else null, type nullable text),
+				    #"Added Final Corrected" = Table.AddColumn(#"Added SKU Size", "Final Corrected Size", each if [SKU Size] <> null then [SKU Size] else [Corrected Size], type text),
+				    #"Added Final Category" = Table.AddColumn(#"Added Final Corrected", "Final Size Category", each if [SKU Size] <> null then "Clothing Size" else [Size Category], type text),
+				    #"Added Calculated Gross" = Table.AddColumn(#"Added Final Category", "Calculated Gross", each Number.Round([PCS] * [RATE], 0), type number),
+				    #"Added Amount Difference" = Table.AddColumn(#"Added Calculated Gross", "Amount Difference", each [GROSS AMT] - [Calculated Gross], type number),
+				    #"Added Difference Pct" = Table.AddColumn(#"Added Amount Difference", "Difference %", each if [Calculated Gross] = 0 then null else Number.Round(([GROSS AMT] - [Calculated Gross]) / [Calculated Gross] * 100, 2), type nullable number),
+				    #"Added Implied Discount" = Table.AddColumn(#"Added Difference Pct", "Implied Discount %", each if [Calculated Gross] = 0 then null else Number.Round(([Calculated Gross] - [GROSS AMT]) / [Calculated Gross] * 100, 2), type nullable number),
+				    #"Added SKU_Key" = Table.AddColumn(#"Added Implied Discount", "SKU_Key", each if [SKU] = "" then null else Text.TrimEnd([SKU], "."), type nullable text)
+				in
+				    #"Added SKU_Key"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,2409 @@
+table _Measures
+	lineageTag: bcf78b4e-11e7-4735-9f98-1d711ec06510
+
+	measure 'Amazon Revenue' = CALCULATE(SUM('Amazon Sale Report'[Amount]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: d3f03cbb-b3aa-48d1-869e-dde0d957a462
+
+	measure 'Amazon Units Sold' = CALCULATE(SUM('Amazon Sale Report'[Qty]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: 87ed23de-4caa-4d09-976d-1609c84df04a
+
+	measure 'Amazon Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: bc88c913-49b2-435b-a3c1-b6abc37255db
+
+	measure 'Amazon All Orders' = DISTINCTCOUNT('Amazon Sale Report'[Order ID])
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: 8727be07-0e2a-4ad4-99cb-4cff738215ef
+
+	measure 'Amazon Cancelled Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status Group] = "Cancelled")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: a484148a-1057-48a2-9370-5959783ec328
+
+	measure 'Amazon Returned Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status Group] = "Returned / Failed")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: dec8f221-d100-4ffd-bd45-2486573d3322
+
+	measure 'Amazon In Progress Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status Group] = "In Progress")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: 3aa6de3d-45e0-4097-a047-68a1c3525027
+
+	measure 'Amazon Delivered Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status] = "Shipped - Delivered to Buyer")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: c0669deb-763a-4bb3-86c1-1dc753393366
+
+	measure 'Amazon Shipped Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status] = "Shipped")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: d3d81582-b06c-4b9c-8cfe-5c4910a4d8b7
+
+	measure 'Amazon Cancellation Rate %' = DIVIDE([Amazon Cancelled Orders], [Amazon All Orders])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: 875a5776-e7f0-4913-b75c-5780440a457f
+
+	measure 'Amazon Return Rate %' = DIVIDE([Amazon Returned Orders], [Amazon All Orders])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: 1a94020d-21a9-405a-9934-2553ff065d7a
+
+	measure 'Amazon Cancelled Value' = CALCULATE(SUM('Amazon Sale Report'[Amount]), 'Amazon Sale Report'[Status Group] = "Cancelled")
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: 26c980dd-d4ba-4580-8002-e0f8f9ae77b9
+
+	measure 'Amazon Average Order Value' = DIVIDE([Amazon Revenue], [Amazon Orders])
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: 094ec4c9-0e8e-46da-8f99-ccff31123827
+
+	measure 'Amazon Average Selling Price' = DIVIDE([Amazon Revenue], [Amazon Units Sold])
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: e51fa9ff-044a-4f6c-80ce-e675eac2caf6
+
+	measure 'Amazon Revenue Previous Month' = CALCULATE([Amazon Revenue], DATEADD(DimDate[Date], -1, MONTH))
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: 6f97545f-32ba-4cfd-8943-145a39cdc37b
+
+	measure 'Amazon Trading Days' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Date]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+		formatString: #,0
+		displayFolder: 1. Amazon
+		lineageTag: a74ea5a4-0872-4a3d-a468-139c7a35737d
+
+	measure 'Amazon Revenue MoM %' =
+			VAR PrevDays = CALCULATE([Amazon Trading Days], DATEADD(DimDate[Date], -1, MONTH))
+			RETURN
+			    IF(
+			        HASONEVALUE(DimDate[Year Month Sort]) && PrevDays >= 20 && NOT ISBLANK([Amazon Revenue]),
+			        DIVIDE([Amazon Revenue] - [Amazon Revenue Previous Month], [Amazon Revenue Previous Month])
+			    )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: 47955bf1-bbcc-4e67-b9ff-3c7c24f7713e
+
+	measure 'Amazon Latest Month MoM %' =
+			VAR LatestDay = CALCULATE(MAX('Amazon Sale Report'[Date]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+			VAR CurrentSales = CALCULATE([Amazon Revenue], DATESBETWEEN(DimDate[Date], EOMONTH(LatestDay, -1) + 1, EOMONTH(LatestDay, 0)))
+			VAR PriorSales = CALCULATE([Amazon Revenue], DATESBETWEEN(DimDate[Date], EOMONTH(LatestDay, -2) + 1, EOMONTH(LatestDay, -1)))
+			VAR PriorDays = CALCULATE([Amazon Trading Days], DATESBETWEEN(DimDate[Date], EOMONTH(LatestDay, -2) + 1, EOMONTH(LatestDay, -1)))
+			RETURN IF(PriorDays >= 20, DIVIDE(CurrentSales - PriorSales, PriorSales))
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: 87ddb44a-7c23-43a1-9828-0303cca0c40e
+
+	measure 'Amazon Latest Month Label' =
+			VAR LatestDay = CALCULATE(MAX('Amazon Sale Report'[Date]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+			RETURN FORMAT(LatestDay, "MMM yy") & " vs " & FORMAT(EOMONTH(LatestDay, -1), "MMM yy")
+		displayFolder: 1. Amazon
+		lineageTag: a2846193-54ed-4ddb-83d2-37a9b5b62cf7
+
+	measure 'Amazon Previous Year Sales' = CALCULATE([Amazon Revenue], DATEADD(DimDate[Date], -1, YEAR))
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: 73e685cd-3da2-4a15-8062-729022ffabf1
+
+	measure 'Amazon YoY Growth %' = DIVIDE([Amazon Revenue] - [Amazon Previous Year Sales], [Amazon Previous Year Sales])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: bae64ca3-04fd-4e8c-8203-22234a266016
+
+	measure 'Amazon Sales Contribution %' = DIVIDE([Amazon Revenue], [Amazon Revenue] + [International Revenue])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: 1191b011-f7d6-4b55-a50a-d30aa119003b
+
+	measure 'International Revenue' = SUM('International sale Report'[GROSS AMT])
+		formatString: \₹#,0
+		displayFolder: 2. International
+		lineageTag: 9e3f7096-1a4f-412d-acac-8306bdecbac4
+
+	measure 'International Units' = SUM('International sale Report'[PCS])
+		formatString: #,0
+		displayFolder: 2. International
+		lineageTag: 070ad3bd-79af-4a5c-b4d3-1e9bb77818a1
+
+	measure 'International Customers' = DISTINCTCOUNT('International sale Report'[CUSTOMER])
+		formatString: #,0
+		displayFolder: 2. International
+		lineageTag: a4650a23-7e35-4854-b54c-7f444e8f89a2
+
+	measure 'International Average Rate' = AVERAGE('International sale Report'[RATE])
+		formatString: \₹#,0
+		displayFolder: 2. International
+		lineageTag: dedff05b-e780-4640-a5fe-6c0ac3d93770
+
+	measure 'International Realised Value per Piece' = DIVIDE([International Revenue], [International Units])
+		formatString: \₹#,0
+		displayFolder: 2. International
+		lineageTag: 0e94b275-1e88-4692-bfa4-99e63b69529c
+
+	measure 'International Listed Value' = SUMX('International sale Report', 'International sale Report'[PCS] * 'International sale Report'[RATE])
+		formatString: \₹#,0
+		displayFolder: 2. International
+		lineageTag: 2389ed0d-44f5-402b-8f60-54c53fd4abc1
+
+	measure 'International Discount vs Listed %' = DIVIDE([International Listed Value] - [International Revenue], [International Listed Value])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 2. International
+		lineageTag: dc4dce6c-636f-4111-afd3-3002444dd4d4
+
+	measure 'International Revenue Previous Month' = CALCULATE([International Revenue], DATEADD(DimDate[Date], -1, MONTH))
+		formatString: \₹#,0
+		displayFolder: 2. International
+		lineageTag: 65899f8b-70c4-476b-a1bc-1f4470c0d415
+
+	measure 'International Revenue MoM %' =
+			IF(
+			    HASONEVALUE(DimDate[Year Month Sort]) && NOT ISBLANK([International Revenue]),
+			    DIVIDE([International Revenue] - [International Revenue Previous Month], [International Revenue Previous Month])
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 2. International
+		lineageTag: 098cd2d1-f65c-445f-bd90-9c23118e5d61
+
+	measure 'International Peak Month Label' =
+			VAR Months = ADDCOLUMNS(VALUES(DimDate[Month Year]), "@v", [International Revenue])
+			RETURN MAXX(TOPN(1, FILTER(Months, NOT ISBLANK([@v])), [@v], DESC), DimDate[Month Year])
+		displayFolder: 2. International
+		lineageTag: c6e51443-f70e-46cb-b0a9-1071caff56e3
+
+	measure 'International Previous Year Sales' = CALCULATE([International Revenue], DATEADD(DimDate[Date], -1, YEAR))
+		formatString: \₹#,0
+		displayFolder: 2. International
+		lineageTag: fbb845d5-ca13-451d-a4fe-5411dfa4dafd
+
+	measure 'International YoY Growth %' = DIVIDE([International Revenue] - [International Previous Year Sales], [International Previous Year Sales])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 2. International
+		lineageTag: a27d2a79-ad57-4e89-be29-ed97562c5055
+
+	measure 'International Top Customer Share %' =
+			VAR Ranked = ADDCOLUMNS(VALUES('International sale Report'[CUSTOMER]), "@v", [International Revenue])
+			RETURN DIVIDE(MAXX(Ranked, [@v]), [International Revenue])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 2. International
+		lineageTag: a0a4e741-6163-4777-8da5-8674bb029539
+
+	measure 'International Top Customer' =
+			VAR Ranked = ADDCOLUMNS(VALUES('International sale Report'[CUSTOMER]), "@v", [International Revenue])
+			RETURN MAXX(TOPN(1, Ranked, [@v], DESC), 'International sale Report'[CUSTOMER])
+		displayFolder: 2. International
+		lineageTag: 020b5683-090d-48ad-bc0d-ec27eedbd444
+
+	measure 'Total Recorded Sales' =
+			VAR A = IF("Amazon" IN VALUES(Segment[Segment]), [Amazon Revenue])
+			VAR I = IF("International" IN VALUES(Segment[Segment]), [International Revenue])
+			RETURN A + I
+		formatString: \₹#,0
+		displayFolder: 3. Combined
+		lineageTag: 643ea736-e598-4034-b76a-283f99e22931
+
+	measure 'Total Recorded Units' =
+			VAR A = IF("Amazon" IN VALUES(Segment[Segment]), [Amazon Units Sold])
+			VAR I = IF("International" IN VALUES(Segment[Segment]), [International Units])
+			RETURN A + I
+		formatString: #,0
+		displayFolder: 3. Combined
+		lineageTag: 5057f18e-ab95-4696-a16f-d2df8063b03f
+
+	measure 'Segment Sales' =
+			SWITCH(
+			    SELECTEDVALUE(Segment[Segment]),
+			    "Amazon", [Amazon Revenue],
+			    "International", [International Revenue],
+			    [Total Recorded Sales]
+			)
+		formatString: \₹#,0
+		displayFolder: 3. Combined
+		lineageTag: 603714a6-6058-4778-9d52-7e638a60578d
+
+	measure 'Amazon Sales Share %' = DIVIDE([Amazon Revenue], [Amazon Revenue] + [International Revenue])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 3. Combined
+		lineageTag: 28280bd1-f898-4206-b454-a914f687c76f
+
+	measure 'International Sales Share %' = DIVIDE([International Revenue], [Amazon Revenue] + [International Revenue])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 3. Combined
+		lineageTag: 54995b0c-b23d-4bec-8d83-b33e946e6471
+
+	measure 'Net Profit Status' = "Not Available - COGS Data Required"
+		displayFolder: 3. Combined
+		lineageTag: a77699e7-b10c-446a-92ba-90fef0bc3c5f
+
+	measure 'Period Label' =
+			VAR A1 = CALCULATE(MIN('Amazon Sale Report'[Date]))
+			VAR I1 = CALCULATE(MIN('International sale Report'[DATE]))
+			VAR A2 = CALCULATE(MAX('Amazon Sale Report'[Date]))
+			VAR I2 = CALCULATE(MAX('International sale Report'[DATE]))
+			VAR Seg = IF(HASONEVALUE(Segment[Segment]), VALUES(Segment[Segment]), "Amazon + International")
+			VAR D1 = SWITCH(Seg, "Amazon", A1, "International", I1, IF(ISBLANK(A1), I1, IF(ISBLANK(I1), A1, MIN(A1, I1))))
+			VAR D2 = SWITCH(Seg, "Amazon", A2, "International", I2, IF(ISBLANK(A2), I2, IF(ISBLANK(I2), A2, MAX(A2, I2))))
+			RETURN IF(ISBLANK(D1), "No data in selection", Seg & "  ·  " & FORMAT(D1, "d MMM yyyy") & " to " & FORMAT(D2, "d MMM yyyy"))
+		displayFolder: 3. Combined
+		lineageTag: 7465e2e6-528b-404a-899f-bf3193b7ae47
+
+	measure 'Total Sales Previous Month' = CALCULATE([Total Recorded Sales], DATEADD(DimDate[Date], -1, MONTH))
+		formatString: \₹#,0
+		displayFolder: 4. Time Intelligence
+		lineageTag: daa2030e-65ae-44b6-891a-d3169033d28c
+
+	measure 'Total Sales MoM %' = IF(HASONEVALUE(DimDate[Year Month Sort]) && NOT ISBLANK([Total Recorded Sales]), DIVIDE([Total Recorded Sales] - [Total Sales Previous Month], [Total Sales Previous Month]))
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 4. Time Intelligence
+		lineageTag: 29208061-9d1f-4cf1-81b2-4570fabca775
+
+	measure 'Total Sales Previous Year' = CALCULATE([Total Recorded Sales], DATEADD(DimDate[Date], -1, YEAR))
+		formatString: \₹#,0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 84030b2a-8ca1-487d-9667-414622178d9a
+
+	measure 'Total Sales YoY %' = DIVIDE([Total Recorded Sales] - [Total Sales Previous Year], [Total Sales Previous Year])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 4. Time Intelligence
+		lineageTag: 139dca4d-bf0d-4043-95ae-baf8343b6c64
+
+	measure 'Total Sales YTD' = TOTALYTD([Total Recorded Sales], DimDate[Date])
+		formatString: \₹#,0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 769f4cb1-3fc6-4156-9df7-833d7f3670e0
+
+	measure 'Total Sales QTD' = TOTALQTD([Total Recorded Sales], DimDate[Date])
+		formatString: \₹#,0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 83cfae85-153a-4700-961e-249959e01f80
+
+	measure 'Total Sales MTD' = TOTALMTD([Total Recorded Sales], DimDate[Date])
+		formatString: \₹#,0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 5ed96421-1913-4bd1-8609-beb5692ed968
+
+	measure 'Total Sales Running Total' =
+			VAR LastVisible = MAX(DimDate[Date])
+			RETURN CALCULATE([Total Recorded Sales], FILTER(ALLSELECTED(DimDate[Date]), DimDate[Date] <= LastVisible))
+		formatString: \₹#,0
+		displayFolder: 4. Time Intelligence
+		lineageTag: b537ae8b-8713-43ff-b1d2-53829eaf677b
+
+	measure 'Amazon Style Rank' =
+			IF(
+			    ISINSCOPE('Amazon Sale Report'[Style]) && [Amazon Revenue] > 0,
+			    ROWNUMBER(
+			        FILTER(ALLSELECTED('Amazon Sale Report'[Style]), [Amazon Revenue] > 0),
+			        ORDERBY([Amazon Revenue], DESC, 'Amazon Sale Report'[Style], ASC)
+			    )
+			)
+		formatString: 0
+		displayFolder: 5. Product
+		lineageTag: a770bd59-655b-41d7-84c2-3b1bf8f04c49
+
+	measure 'Amazon Style Units Rank' =
+			IF(
+			    ISINSCOPE('Amazon Sale Report'[Style]) && [Amazon Units Sold] > 0,
+			    ROWNUMBER(
+			        FILTER(ALLSELECTED('Amazon Sale Report'[Style]), [Amazon Units Sold] > 0),
+			        ORDERBY([Amazon Units Sold], DESC, 'Amazon Sale Report'[Style], ASC)
+			    )
+			)
+		formatString: 0
+		displayFolder: 5. Product
+		lineageTag: 3643fc98-f311-4126-9ce9-0ee9f92b8ce2
+
+	measure 'Amazon Style Low Rank' =
+			IF(
+			    ISINSCOPE('Amazon Sale Report'[Style]) && [Amazon Revenue] > 0,
+			    ROWNUMBER(
+			        FILTER(ALLSELECTED('Amazon Sale Report'[Style]), [Amazon Revenue] > 0),
+			        ORDERBY([Amazon Revenue], ASC, 'Amazon Sale Report'[Style], ASC)
+			    )
+			)
+		formatString: 0
+		displayFolder: 5. Product
+		lineageTag: b46063bb-06f3-4494-a583-bcf890771802
+
+	measure 'International Style Rank' =
+			IF(
+			    ISINSCOPE('International sale Report'[Style]) && [International Revenue] > 0,
+			    ROWNUMBER(
+			        FILTER(ALLSELECTED('International sale Report'[Style]), [International Revenue] > 0),
+			        ORDERBY([International Revenue], DESC, 'International sale Report'[Style], ASC)
+			    )
+			)
+		formatString: 0
+		displayFolder: 5. Product
+		lineageTag: b663af13-30b5-4c9a-be58-f9b391afb595
+
+	measure 'International Style Low Rank' =
+			IF(
+			    ISINSCOPE('International sale Report'[Style]) && [International Revenue] > 0,
+			    ROWNUMBER(
+			        FILTER(ALLSELECTED('International sale Report'[Style]), [International Revenue] > 0),
+			        ORDERBY([International Revenue], ASC, 'International sale Report'[Style], ASC)
+			    )
+			)
+		formatString: 0
+		displayFolder: 5. Product
+		lineageTag: d4ca3312-42ab-4338-bb54-51906da46785
+
+	measure 'Top 10 Style Sales' = VAR R = [Amazon Style Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [Amazon Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: 13f623a4-9867-4492-b80c-c250fbc5ab2d
+
+	measure 'Top 10 Style Units' = VAR R = [Amazon Style Units Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [Amazon Units Sold])
+		formatString: #,0
+		displayFolder: 5. Product
+		lineageTag: cbb9e6a9-8c56-4d54-b5a2-5f3845096b45
+
+	measure 'Low 10 Style Sales' = VAR R = [Amazon Style Low Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [Amazon Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: c1c3d39d-68ac-464e-a00f-972fa51f7edc
+
+	measure 'Low 10 Style Units' = VAR R = [Amazon Style Low Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [Amazon Units Sold])
+		formatString: #,0
+		displayFolder: 5. Product
+		lineageTag: 11823103-add0-41da-b89f-dcdc69a392ad
+
+	measure 'International Top 10 Style Sales' = VAR R = [International Style Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [International Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: da00ca74-df62-49e7-93e9-8a3e3ed5769e
+
+	measure 'International Low 10 Style Sales' = VAR R = [International Style Low Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [International Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: 8e96460d-9a42-4221-b6f4-1540ae41944b
+
+	measure 'International Low 10 Style Units' = VAR R = [International Style Low Rank] RETURN IF(NOT ISBLANK(R) && R <= 10, [International Units])
+		formatString: #,0
+		displayFolder: 5. Product
+		lineageTag: f33a0565-eae0-47ee-9e1e-8aa236a058fd
+
+	measure 'Amazon Styles With Sales' = COUNTROWS(FILTER(VALUES('Amazon Sale Report'[Style]), [Amazon Revenue] > 0))
+		formatString: #,0
+		displayFolder: 5. Product
+		lineageTag: 71f7bf48-e741-4e82-ba4c-d47388b2fbf2
+
+	measure 'Top 10 Style Share %' =
+			VAR Top10 = TOPN(10, VALUES('Amazon Sale Report'[Style]), [Amazon Revenue], DESC)
+			RETURN DIVIDE(CALCULATE([Amazon Revenue], Top10), [Amazon Revenue])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 5. Product
+		lineageTag: c291e32f-14bd-4679-84b8-220ce61b6eea
+
+	measure 'Top Style Name' =
+			VAR Top1 = TOPN(1, VALUES('Amazon Sale Report'[Style]), [Amazon Revenue], DESC, 'Amazon Sale Report'[Style], ASC)
+			RETURN MAXX(Top1, 'Amazon Sale Report'[Style])
+		displayFolder: 5. Product
+		lineageTag: 334acd0f-c7c4-4626-a9db-cc29e036eec0
+
+	measure 'Top Product Revenue' = MAXX(VALUES('Amazon Sale Report'[Style]), [Amazon Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: c023cb07-e1e9-450f-b863-f3c00463c44c
+
+	measure 'Top Product Units' = MAXX(VALUES('Amazon Sale Report'[Style]), [Amazon Units Sold])
+		formatString: #,0
+		displayFolder: 5. Product
+		lineageTag: 4b3d92b7-027f-4321-8199-f04aef165e31
+
+	measure 'Top State Name' =
+			VAR Top1 = TOPN(1, FILTER(VALUES('Amazon Sale Report'[State Clean]), NOT ISBLANK('Amazon Sale Report'[State Clean])), [Amazon Revenue], DESC)
+			RETURN MAXX(Top1, 'Amazon Sale Report'[State Clean])
+		displayFolder: 5. Product
+		lineageTag: 77c8f074-3ff2-4733-819b-ba0a94304bd8
+
+	measure 'Top State Share %' =
+			VAR Top1 = TOPN(1, FILTER(VALUES('Amazon Sale Report'[State Clean]), NOT ISBLANK('Amazon Sale Report'[State Clean])), [Amazon Revenue], DESC)
+			RETURN DIVIDE(CALCULATE([Amazon Revenue], Top1), [Amazon Revenue])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 5. Product
+		lineageTag: 3b2580cf-d9bf-4dac-89b9-d573357771e2
+
+	measure 'Top 10 State Sales' =
+			VAR R = IF(ISINSCOPE('Amazon Sale Report'[State Clean]) && [Amazon Revenue] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('Amazon Sale Report'[State Clean]), [Amazon Revenue] > 0 && NOT ISBLANK('Amazon Sale Report'[State Clean])), ORDERBY([Amazon Revenue], DESC, 'Amazon Sale Report'[State Clean], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 10, [Amazon Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: 72976f86-7b77-4de2-8f2d-1311627c35aa
+
+	measure 'Top 10 City Sales' =
+			VAR R = IF(ISINSCOPE('Amazon Sale Report'[ship-city]) && [Amazon Revenue] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('Amazon Sale Report'[ship-city]), [Amazon Revenue] > 0 && NOT ISBLANK('Amazon Sale Report'[ship-city])), ORDERBY([Amazon Revenue], DESC, 'Amazon Sale Report'[ship-city], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 10, [Amazon Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: b893da17-a05d-4921-8bfb-779aa45f6bf3
+
+	measure 'Top 10 Customer Sales' =
+			VAR R = IF(ISINSCOPE('International sale Report'[CUSTOMER]) && [International Revenue] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('International sale Report'[CUSTOMER]), [International Revenue] > 0), ORDERBY([International Revenue], DESC, 'International sale Report'[CUSTOMER], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 10, [International Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: b302d1ad-ff8f-41ac-966c-01eff24c1f53
+
+	measure 'Top 10 Intl SKU Sales' =
+			VAR R = IF(ISINSCOPE(DimSKU[SKU_Key]) && [International Revenue] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED(DimSKU[SKU_Key]), [International Revenue] > 0 && DimSKU[SKU_Key] <> ""), ORDERBY([International Revenue], DESC, DimSKU[SKU_Key], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 10, [International Revenue])
+		formatString: \₹#,0
+		displayFolder: 5. Product
+		lineageTag: 9de24abe-1f3a-4651-a90a-847bcecf74e8
+
+	measure 'Unique Catalog SKUs' = DISTINCTCOUNT('Sale Report'[SKU_Key])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 8f989590-1242-4266-8175-ad27e96a04de
+
+	measure 'Unique Amazon SKUs' = DISTINCTCOUNT('Amazon Sale Report'[SKU_Key])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 1bda2021-b129-44b5-a350-264865ad6906
+
+	measure 'Total Stock' = SUM('Sale Report'[Stock])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 0095859b-32cb-41a4-ace2-ce32300a6030
+
+	measure 'Matched Amazon SKUs' = COUNTROWS(INTERSECT(VALUES('Amazon Sale Report'[SKU_Key]), VALUES('Sale Report'[SKU_Key])))
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 2323ab07-e043-41b3-90db-c12bc328372a
+
+	measure 'Unmatched Amazon SKUs' = [Unique Amazon SKUs] - [Matched Amazon SKUs]
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 52bfa558-310e-497a-9e73-ff2f48d2a3b2
+
+	measure 'SKU Match Coverage %' = DIVIDE([Matched Amazon SKUs], [Unique Amazon SKUs])
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 6. Inventory
+		lineageTag: 4a208131-3b99-4782-b321-aa6e188cd724
+
+	measure 'Units Sold on Matched SKUs' = CALCULATE([Amazon Units Sold], TREATAS(VALUES('Sale Report'[SKU_Key]), 'Amazon Sale Report'[SKU_Key]))
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 67614c25-a14b-4ac4-916e-6982ec93afb6
+
+	measure 'Top 15 SKU Units' =
+			VAR R = IF(ISINSCOPE(DimSKU[SKU_Key]) && [Amazon Units Sold] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED(DimSKU[SKU_Key]), [Amazon Units Sold] > 0), ORDERBY([Amazon Units Sold], DESC, DimSKU[SKU_Key], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 15, [Amazon Units Sold])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 7183e110-58ab-4c40-ad3a-f634641d12f8
+
+	measure 'Avg Amazon MRP' = AVERAGE('May-2022'[Amazon MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: a7857486-8b01-44ce-9303-0a3eec119e0c
+
+	measure 'Avg Flipkart MRP' = AVERAGE('May-2022'[Flipkart MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: a2ff80fa-3b92-4376-acdc-fbcda28b000c
+
+	measure 'Avg Myntra MRP' = AVERAGE('May-2022'[Myntra MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 3d4f99d4-e43d-4989-a094-2bbe6767beb7
+
+	measure 'Avg Ajio MRP' = AVERAGE('May-2022'[Ajio MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 346ef5c1-6673-4c2b-a63c-47ec2a90cdb6
+
+	measure 'Avg Snapdeal MRP' = AVERAGE('May-2022'[Snapdeal MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 3574fb44-33ff-4179-8f60-42db1f267e0b
+
+	measure 'Avg Paytm MRP' = AVERAGE('May-2022'[Paytm MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 78ce6d46-9728-42b7-9451-4dd1da224b11
+
+	measure 'Avg Amazon MRP Mar2021' = AVERAGE('PL_March_2021'[Amazon MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: a31774d1-3bc1-4e90-913c-89514205bb5b
+
+	measure 'Marketplace Avg MRP May 2022' =
+			SWITCH(
+			    SELECTEDVALUE(Marketplace[Marketplace]),
+			    "Amazon", AVERAGE('May-2022'[Amazon MRP]),
+			    "Amazon FBA", AVERAGE('May-2022'[Amazon FBA MRP]),
+			    "Flipkart", AVERAGE('May-2022'[Flipkart MRP]),
+			    "Myntra", AVERAGE('May-2022'[Myntra MRP]),
+			    "Ajio", AVERAGE('May-2022'[Ajio MRP]),
+			    "Snapdeal", AVERAGE('May-2022'[Snapdeal MRP]),
+			    "Paytm", AVERAGE('May-2022'[Paytm MRP]),
+			    "Limeroad", AVERAGE('May-2022'[Limeroad MRP])
+			)
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 3ab7cf00-3556-485b-898c-f0ae48e5febd
+
+	measure 'Marketplace Avg MRP Mar 2021' =
+			SWITCH(
+			    SELECTEDVALUE(Marketplace[Marketplace]),
+			    "Amazon", AVERAGE('PL_March_2021'[Amazon MRP]),
+			    "Amazon FBA", AVERAGE('PL_March_2021'[Amazon FBA MRP]),
+			    "Flipkart", AVERAGE('PL_March_2021'[Flipkart MRP]),
+			    "Myntra", AVERAGE('PL_March_2021'[Myntra MRP]),
+			    "Ajio", AVERAGE('PL_March_2021'[Ajio MRP]),
+			    "Snapdeal", AVERAGE('PL_March_2021'[Snapdeal MRP]),
+			    "Paytm", AVERAGE('PL_March_2021'[Paytm MRP]),
+			    "Limeroad", AVERAGE('PL_March_2021'[Limeroad MRP])
+			)
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 33b43fe9-8089-4abf-9c26-ad3911bf277a
+
+	measure 'Marketplace Priced Products' =
+			SWITCH(
+			    SELECTEDVALUE(Marketplace[Marketplace]),
+			    "Amazon", COUNT('May-2022'[Amazon MRP]),
+			    "Amazon FBA", COUNT('May-2022'[Amazon FBA MRP]),
+			    "Flipkart", COUNT('May-2022'[Flipkart MRP]),
+			    "Myntra", COUNT('May-2022'[Myntra MRP]),
+			    "Ajio", COUNT('May-2022'[Ajio MRP]),
+			    "Snapdeal", COUNT('May-2022'[Snapdeal MRP]),
+			    "Paytm", COUNT('May-2022'[Paytm MRP]),
+			    "Limeroad", COUNT('May-2022'[Limeroad MRP])
+			)
+		formatString: #,0
+		displayFolder: 7. Pricing
+		lineageTag: 5d45fc01-cbb2-4b2b-ba34-ece7fd53ad4a
+
+	measure 'Marketplace Coverage %' = DIVIDE([Marketplace Priced Products], COUNTROWS('May-2022'))
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 7. Pricing
+		lineageTag: 976d6ded-50e5-4364-b134-44a8fb336380
+
+	measure 'Products With Prices' = CALCULATE(COUNTROWS('May-2022'), NOT ISBLANK('May-2022'[Amazon MRP]))
+		formatString: #,0
+		displayFolder: 7. Pricing
+		lineageTag: 3dc63504-56fd-4f57-8317-d7de941a902f
+
+	measure 'Products With Price Variation' = COUNTROWS(FILTER('May-2022', VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) RETURN MAXX(Valid, [Value]) - MINX(Valid, [Value]) > 0))
+		formatString: #,0
+		displayFolder: 7. Pricing
+		lineageTag: f7478b5e-3a8c-48fa-8e38-ca9b58bbd304
+
+	measure 'Avg Price Spread' = AVERAGEX(FILTER('May-2022', VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) RETURN MAXX(Valid, [Value]) - MINX(Valid, [Value]) > 0), VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) RETURN MAXX(Valid, [Value]) - MINX(Valid, [Value]))
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 555845db-ddaf-4659-8f98-b8574d315667
+
+	measure 'Max Price Spread' = MAXX('May-2022', VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) RETURN MAXX(Valid, [Value]) - MINX(Valid, [Value]))
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 66c0d63a-1695-47f1-becc-1459acb6a81c
+
+	measure 'Product Price Spread' =
+			IF(
+			    HASONEVALUE('May-2022'[Sku]),
+			    MAXX('May-2022', VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) RETURN MAXX(Valid, [Value]) - MINX(Valid, [Value]))
+			)
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 8bfd7080-221c-4c2b-9e27-f5b2dafc5afb
+
+	measure 'Top 12 Price Spread' =
+			VAR R = IF(ISINSCOPE('May-2022'[Sku]) && [Product Price Spread] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('May-2022'[Sku]), [Product Price Spread] > 0), ORDERBY([Product Price Spread], DESC, 'May-2022'[Sku], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 12, [Product Price Spread])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 03a3f245-f4a8-4cb4-b6af-d293285a4d33
+
+	measure 'Snapshot Price Changes' =
+			0 + COUNTROWS(
+			    FILTER(
+			        'May-2022',
+			        VAR K = 'May-2022'[SKU_Key]
+			        VAR P = CALCULATE(MAX('PL_March_2021'[Amazon MRP]), REMOVEFILTERS('PL_March_2021'), 'PL_March_2021'[SKU_Key] = K)
+			        RETURN NOT ISBLANK('May-2022'[Amazon MRP]) && NOT ISBLANK(P) && 'May-2022'[Amazon MRP] <> P
+			    )
+			)
+		formatString: #,0
+		displayFolder: 7. Pricing
+		lineageTag: ab86f931-ac6f-405e-9e0b-6b3e2876ca91
+
+	measure 'Total Received Amount' = SUM('Expense IIGF'[Received Amount])
+		formatString: \₹#,0
+		displayFolder: 8. Cash and Expense
+		lineageTag: df9cf713-dbca-4ea7-ba25-abaaa302bfac
+
+	measure 'Total Recorded Expenses' = CALCULATE(SUM('Expense IIGF'[Expense Amount]), REMOVEFILTERS(DimDate))
+		formatString: \₹#,0
+		displayFolder: 8. Cash and Expense
+		lineageTag: 86dbcd91-a5d4-44c1-abe6-9694bc29a81b
+
+	measure 'Recorded Net Cash Position' = CALCULATE([Total Received Amount], REMOVEFILTERS(DimDate)) - [Total Recorded Expenses]
+		formatString: \₹#,0
+		displayFolder: 8. Cash and Expense
+		lineageTag: b964d7cf-ddbf-4f9c-ac2e-facd05245808
+
+	measure 'Largest Expense Name' =
+			VAR Top1 = TOPN(1, CALCULATETABLE(VALUES('Expense IIGF'[Expense Particular]), REMOVEFILTERS(DimDate)), [Total Recorded Expenses], DESC)
+			RETURN MAXX(Top1, 'Expense IIGF'[Expense Particular])
+		displayFolder: 8. Cash and Expense
+		lineageTag: 872a7fc6-cc63-485d-ab7f-0d75b4434421
+
+	measure 'Shiprocket Rate' =
+			VAR S = IFERROR(VALUE(SUBSTITUTE(SELECTEDVALUE('Cloud Warehouse Compersion Chart'[Shiprocket Price / Details]), "₹", "")), BLANK())
+			VAR I = IFERROR(VALUE(SUBSTITUTE(SELECTEDVALUE('Cloud Warehouse Compersion Chart'[INCREFF Price / Details]), "₹", "")), BLANK())
+			RETURN IF(NOT ISBLANK(S) && NOT ISBLANK(I), S)
+		formatString: \₹#,0.00
+		displayFolder: 9. Logistics
+		lineageTag: 6a677ba9-98bd-4275-94fa-f752c2dcbb23
+
+	measure 'Increff Rate' =
+			VAR S = IFERROR(VALUE(SUBSTITUTE(SELECTEDVALUE('Cloud Warehouse Compersion Chart'[Shiprocket Price / Details]), "₹", "")), BLANK())
+			VAR I = IFERROR(VALUE(SUBSTITUTE(SELECTEDVALUE('Cloud Warehouse Compersion Chart'[INCREFF Price / Details]), "₹", "")), BLANK())
+			RETURN IF(NOT ISBLANK(S) && NOT ISBLANK(I), I)
+		formatString: \₹#,0.00
+		displayFolder: 9. Logistics
+		lineageTag: e0f82be6-5167-40a8-9351-f73b677ea500
+
+	measure 'KPI Total Sales' =
+			VAR _Raw = "₹" & IF(ISBLANK([Total Recorded Sales]), "—", IF(ABS([Total Recorded Sales]) >= 1000000, FORMAT([Total Recorded Sales] / 1000000, "0.0") & "M", IF(ABS([Total Recorded Sales]) >= 1000, FORMAT([Total Recorded Sales] / 1000, "0.0") & "K", FORMAT([Total Recorded Sales], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Periods differ by segment"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Year Month Sort]), NOT ISBLANK([Total Recorded Sales]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Total Recorded Sales], "@i", RANKX(_Base, DimDate[Year Month Sort], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Total Recorded Sales</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: bb800300-daae-46b9-a8e9-83192a75af7c
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Sales' =
+			VAR _Raw = IF("Amazon" IN VALUES(Segment[Segment]), "₹" & IF(ISBLANK([Amazon Revenue]), "—", IF(ABS([Amazon Revenue]) >= 1000000, FORMAT([Amazon Revenue] / 1000000, "0.0") & "M", IF(ABS([Amazon Revenue]) >= 1000, FORMAT([Amazon Revenue] / 1000, "0.0") & "K", FORMAT([Amazon Revenue], "#,0")))), "—")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", IF("Amazon" IN VALUES(Segment[Segment]), FORMAT([Amazon Sales Share %], "0.0%") & " of recorded sales", "Segment not selected"))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Revenue]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Revenue], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Recorded Sales</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: f48d447b-a189-4ae0-8d03-8534205d4111
+		dataCategory: ImageUrl
+
+	measure 'KPI International Sales' =
+			VAR _Raw = IF("International" IN VALUES(Segment[Segment]), "₹" & IF(ISBLANK([International Revenue]), "—", IF(ABS([International Revenue]) >= 1000000, FORMAT([International Revenue] / 1000000, "0.0") & "M", IF(ABS([International Revenue]) >= 1000, FORMAT([International Revenue] / 1000, "0.0") & "K", FORMAT([International Revenue], "#,0")))), "—")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", IF("International" IN VALUES(Segment[Segment]), FORMAT([International Sales Share %], "0.0%") & " of recorded sales", "Segment not selected"))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Year Month Sort]), NOT ISBLANK([International Revenue]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [International Revenue], "@i", RANKX(_Base, DimDate[Year Month Sort], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#58A6A6' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#58A6A6' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>International Recorded Sales</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c7638218-a1d3-4d66-b71e-554b2f77a9a5
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Orders' =
+			VAR _Raw = IF("Amazon" IN VALUES(Segment[Segment]), IF(ISBLANK([Amazon Orders]), "—", IF(ABS([Amazon Orders]) >= 1000000, FORMAT([Amazon Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Orders]) >= 1000, FORMAT([Amazon Orders] / 1000, "0.0") & "K", FORMAT([Amazon Orders], "#,0")))), "—")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", IF("Amazon" IN VALUES(Segment[Segment]), "Avg order ₹" & FORMAT([Amazon Average Order Value], "#,0"), "Segment not selected"))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Orders]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Orders], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 5166813e-8db2-4f80-bee5-2467015a25d0
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Units' =
+			VAR _Raw = IF("Amazon" IN VALUES(Segment[Segment]), IF(ISBLANK([Amazon Units Sold]), "—", IF(ABS([Amazon Units Sold]) >= 1000000, FORMAT([Amazon Units Sold] / 1000000, "0.0") & "M", IF(ABS([Amazon Units Sold]) >= 1000, FORMAT([Amazon Units Sold] / 1000, "0.0") & "K", FORMAT([Amazon Units Sold], "#,0")))), "—")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", IF("Amazon" IN VALUES(Segment[Segment]), "Avg price ₹" & FORMAT([Amazon Average Selling Price], "#,0"), "Segment not selected"))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Units Sold]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Units Sold], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Units Sold</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 3de3d429-8876-4478-a6f8-33d5aef7fb5f
+		dataCategory: ImageUrl
+
+	measure 'KPI International Units' =
+			VAR _Raw = IF("International" IN VALUES(Segment[Segment]), IF(ISBLANK([International Units]), "—", IF(ABS([International Units]) >= 1000000, FORMAT([International Units] / 1000000, "0.0") & "M", IF(ABS([International Units]) >= 1000, FORMAT([International Units] / 1000, "0.0") & "K", FORMAT([International Units], "#,0")))), "—")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", IF("International" IN VALUES(Segment[Segment]), FORMAT([International Customers], "#,0") & " customers", "Segment not selected"))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Year Month Sort]), NOT ISBLANK([International Units]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [International Units], "@i", RANKX(_Base, DimDate[Year Month Sort], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#58A6A6' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#58A6A6' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>International Units</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 8e7296a4-3abb-460f-9ecc-99cc471b0c57
+		dataCategory: ImageUrl
+
+	measure 'KPI Growth' =
+			VAR _Raw = IF("Amazon" IN VALUES(Segment[Segment]), IF(ISBLANK([Amazon Revenue]), "—", IF(ISBLANK([Amazon Latest Month MoM %]), "n/a", IF([Amazon Latest Month MoM %] >= 0, "▲ ", "▼ ") & FORMAT(ABS([Amazon Latest Month MoM %]), "0.0%"))), "—")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon Revenue]), "No data in selection", IF("Amazon" IN VALUES(Segment[Segment]), IF(ISBLANK([Amazon Latest Month MoM %]), "Needs two full months", [Amazon Latest Month Label] & ". " & FORMAT([Amazon Latest Month Per Day MoM %], "+0.0%;-0.0%") & " per day"), "Segment not selected"))
+			VAR _SubColor = IF([Amazon Latest Month MoM %] < 0, "#E77D67", "#65C99A")
+			VAR _Base = FILTER(VALUES(DimDate[Year Month Sort]), NOT ISBLANK([Amazon Revenue]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Revenue], "@i", RANKX(_Base, DimDate[Year Month Sort], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#65C99A' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#65C99A' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#65C99A'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Sales Growth MoM</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c2b83d4f-367d-46c5-afa9-7bf5bc4e4564
+		dataCategory: ImageUrl
+
+	measure 'KPI Expenses' =
+			VAR _Raw = "₹" & IF(ISBLANK([Total Recorded Expenses]), "—", IF(ABS([Total Recorded Expenses]) >= 1000000, FORMAT([Total Recorded Expenses] / 1000000, "0.0") & "M", IF(ABS([Total Recorded Expenses]) >= 1000, FORMAT([Total Recorded Expenses] / 1000, "0.0") & "K", FORMAT([Total Recorded Expenses], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "IIGF event sheet only"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Recorded Expenses</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 37326b59-ed08-4a06-b2fe-596e58767607
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon AOV' =
+			VAR _Raw = "₹" & FORMAT([Amazon Average Order Value], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", "Recognised sales ÷ orders")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Order Value</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: da742804-60c4-47f4-893d-9b58414c5273
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon ASP' =
+			VAR _Raw = "₹" & FORMAT([Amazon Average Selling Price], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", "Recognised sales ÷ units")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Selling Price</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 46561c03-f7f7-43c5-b211-ab8e8d617310
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Cancelled' =
+			VAR _Raw = IF(ISBLANK([Amazon Cancelled Orders]), "—", IF(ABS([Amazon Cancelled Orders]) >= 1000000, FORMAT([Amazon Cancelled Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Cancelled Orders]) >= 1000, FORMAT([Amazon Cancelled Orders] / 1000, "0.0") & "K", FORMAT([Amazon Cancelled Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", FORMAT([Amazon Cancellation Rate %], "0.0%") & " of all orders")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Cancelled Orders]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Cancelled Orders], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#E77D67' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#E77D67' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Cancelled Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 97d4229e-56cb-4b48-8a30-2fae3f8aec16
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Returned' =
+			VAR _Raw = IF(ISBLANK([Amazon Returned Orders]), "—", IF(ABS([Amazon Returned Orders]) >= 1000000, FORMAT([Amazon Returned Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Returned Orders]) >= 1000, FORMAT([Amazon Returned Orders] / 1000, "0.0") & "K", FORMAT([Amazon Returned Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", FORMAT([Amazon Return Rate %], "0.0%") & " of all orders")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Returned Orders]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Returned Orders], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#E77D67' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#E77D67' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Returned / Failed Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: f8fd0046-6720-4cd2-a770-00539b881f93
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Shipped' =
+			VAR _Raw = IF(ISBLANK([Amazon Shipped Orders]), "—", IF(ABS([Amazon Shipped Orders]) >= 1000000, FORMAT([Amazon Shipped Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Shipped Orders]) >= 1000, FORMAT([Amazon Shipped Orders] / 1000, "0.0") & "K", FORMAT([Amazon Shipped Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", "Status: Shipped")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Shipped Orders]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Shipped Orders], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#65C99A' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#65C99A' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#65C99A'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Shipped Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 67b74e40-30fe-4747-9c92-b57b82d5046b
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Delivered' =
+			VAR _Raw = IF(ISBLANK([Amazon Delivered Orders]), "—", IF(ABS([Amazon Delivered Orders]) >= 1000000, FORMAT([Amazon Delivered Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Delivered Orders]) >= 1000, FORMAT([Amazon Delivered Orders] / 1000, "0.0") & "K", FORMAT([Amazon Delivered Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", "Status: Delivered")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Delivered Orders]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Delivered Orders], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#65C99A' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#65C99A' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#65C99A'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Delivered to Buyer</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: eddf473f-6e9a-4550-aa71-2ec7f9f78eda
+		dataCategory: ImageUrl
+
+	measure 'KPI Intl Rate' =
+			VAR _Raw = "₹" & FORMAT([International Average Rate], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", "Mean of RATE per line")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Listed Rate</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 66aca612-0521-42d0-8e67-83348ddcc98f
+		dataCategory: ImageUrl
+
+	measure 'KPI Intl Value' =
+			VAR _Raw = "₹" & FORMAT([International Realised Value per Piece], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", "GROSS AMT ÷ PCS")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Realised Value per Piece</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 5f3a8adb-97da-4c1d-bb1f-6c99eb35f206
+		dataCategory: ImageUrl
+
+	measure 'KPI Intl Discount' =
+			VAR _Raw = FORMAT([International Discount vs Listed %], "0.0%")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", "GROSS AMT vs PCS × RATE")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Discount vs Listed</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 45544286-b6ab-4354-bee0-570ebea80987
+		dataCategory: ImageUrl
+
+	measure 'KPI Intl Top Customer' =
+			VAR _Raw = FORMAT([International Top Customer Share %], "0.0%")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", LEFT([International Top Customer], 24))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Top Customer Share</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c4cbfb50-377b-42e5-8aa9-db10929e4ce6
+		dataCategory: ImageUrl
+
+	measure 'KPI Intl Peak' =
+			VAR _Raw = [International Peak Month Label]
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", "Highest recorded sales")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Peak Month</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 2231a1e5-a4f7-4479-b2f7-b4c6067d28fb
+		dataCategory: ImageUrl
+
+	measure 'KPI Unique SKUs' =
+			VAR _Raw = IF(ISBLANK([Unique Amazon SKUs]), "—", IF(ABS([Unique Amazon SKUs]) >= 1000000, FORMAT([Unique Amazon SKUs] / 1000000, "0.0") & "M", IF(ABS([Unique Amazon SKUs]) >= 1000, FORMAT([Unique Amazon SKUs] / 1000, "0.0") & "K", FORMAT([Unique Amazon SKUs], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", FORMAT([Unique Catalog SKUs], "#,0") & " in stock catalogue")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='265' height='128' viewBox='0 0 265 128'>" &
+			    "<rect x='0.5' y='0.5' width='264' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon SKUs Sold or Listed</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 09e923d1-eb65-40ea-8a68-7bb80d535387
+		dataCategory: ImageUrl
+
+	measure 'KPI Total Stock' =
+			VAR _Raw = IF(ISBLANK([Total Stock]), "—", IF(ABS([Total Stock]) >= 1000000, FORMAT([Total Stock] / 1000000, "0.0") & "M", IF(ABS([Total Stock]) >= 1000, FORMAT([Total Stock] / 1000, "0.0") & "K", FORMAT([Total Stock], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "A snapshot, not units sold"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='265' height='128' viewBox='0 0 265 128'>" &
+			    "<rect x='0.5' y='0.5' width='264' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Recorded Stock (Units)</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 33927a13-4315-4dd7-b211-3caec47b70ad
+		dataCategory: ImageUrl
+
+	measure 'KPI Matched SKUs' =
+			VAR _Raw = IF(ISBLANK([Matched Amazon SKUs]), "—", IF(ABS([Matched Amazon SKUs]) >= 1000000, FORMAT([Matched Amazon SKUs] / 1000000, "0.0") & "M", IF(ABS([Matched Amazon SKUs]) >= 1000, FORMAT([Matched Amazon SKUs] / 1000, "0.0") & "K", FORMAT([Matched Amazon SKUs], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", FORMAT([SKU Match Coverage %], "0.0%") & " coverage")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='265' height='128' viewBox='0 0 265 128'>" &
+			    "<rect x='0.5' y='0.5' width='264' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#65C99A'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>SKUs Matched to Stock</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c2fd69d2-0b6d-4f42-a1f6-e759048d87a7
+		dataCategory: ImageUrl
+
+	measure 'KPI Unmatched SKUs' =
+			VAR _Raw = IF(ISBLANK([Unmatched Amazon SKUs]), "—", IF(ABS([Unmatched Amazon SKUs]) >= 1000000, FORMAT([Unmatched Amazon SKUs] / 1000000, "0.0") & "M", IF(ABS([Unmatched Amazon SKUs]) >= 1000, FORMAT([Unmatched Amazon SKUs] / 1000, "0.0") & "K", FORMAT([Unmatched Amazon SKUs], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", "Not forced to match")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='265' height='128' viewBox='0 0 265 128'>" &
+			    "<rect x='0.5' y='0.5' width='264' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>SKUs Without Stock Record</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 084ba8e5-a626-470f-95b9-554ac81d47f8
+		dataCategory: ImageUrl
+
+	measure 'KPI Matched Units' =
+			VAR _Raw = IF(ISBLANK([Units Sold on Matched SKUs]), "—", IF(ABS([Units Sold on Matched SKUs]) >= 1000000, FORMAT([Units Sold on Matched SKUs] / 1000000, "0.0") & "M", IF(ABS([Units Sold on Matched SKUs]) >= 1000, FORMAT([Units Sold on Matched SKUs] / 1000, "0.0") & "K", FORMAT([Units Sold on Matched SKUs], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", FORMAT(DIVIDE([Units Sold on Matched SKUs], [Amazon Units Sold]), "0.0%") & " of Amazon units")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='265' height='128' viewBox='0 0 265 128'>" &
+			    "<rect x='0.5' y='0.5' width='264' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Units on Matched SKUs</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: f2aa6371-6924-4ee9-8d22-01335be36870
+		dataCategory: ImageUrl
+
+	measure 'KPI MRP Amazon' =
+			VAR _Raw = "₹" & FORMAT([Avg Amazon MRP], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "May 2022 snapshot"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Amazon MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 152ead1c-7b56-4ffd-a5b5-c5464058ea46
+		dataCategory: ImageUrl
+
+	measure 'KPI MRP Flipkart' =
+			VAR _Raw = "₹" & FORMAT([Avg Flipkart MRP], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "May 2022 snapshot"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Flipkart MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 13083ac7-71b6-48bb-9ff1-9fea6035e978
+		dataCategory: ImageUrl
+
+	measure 'KPI MRP Myntra' =
+			VAR _Raw = "₹" & FORMAT([Avg Myntra MRP], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "May 2022 snapshot"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Myntra MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 811e370e-4eb9-4702-b281-87abe3709888
+		dataCategory: ImageUrl
+
+	measure 'KPI MRP Ajio' =
+			VAR _Raw = "₹" & FORMAT([Avg Ajio MRP], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "May 2022 snapshot"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Ajio MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 728775ce-5904-4313-9d12-782e9f46a191
+		dataCategory: ImageUrl
+
+	measure 'KPI MRP Snapdeal' =
+			VAR _Raw = "₹" & FORMAT([Avg Snapdeal MRP], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "May 2022 snapshot"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Snapdeal MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: aeab0619-91d6-48b9-880c-9ed77cb6bae9
+		dataCategory: ImageUrl
+
+	measure 'KPI Priced Products' =
+			VAR _Raw = IF(ISBLANK([Products With Prices]), "—", IF(ABS([Products With Prices]) >= 1000000, FORMAT([Products With Prices] / 1000000, "0.0") & "M", IF(ABS([Products With Prices]) >= 1000, FORMAT([Products With Prices] / 1000, "0.0") & "K", FORMAT([Products With Prices], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = FORMAT(COUNTROWS('May-2022'), "#,0") & " products listed"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Products With Prices</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: aa76f673-4456-4893-895d-4dd3808b3293
+		dataCategory: ImageUrl
+
+	measure 'KPI Price Variation' =
+			VAR _Raw = IF(ISBLANK([Products With Price Variation]), "—", IF(ABS([Products With Price Variation]) >= 1000000, FORMAT([Products With Price Variation] / 1000000, "0.0") & "M", IF(ABS([Products With Price Variation]) >= 1000, FORMAT([Products With Price Variation] / 1000, "0.0") & "K", FORMAT([Products With Price Variation], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "MRP differs by marketplace"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Products With Price Gaps</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 25512ed2-e2df-4387-9576-95bc31fbcbcc
+		dataCategory: ImageUrl
+
+	measure 'KPI Avg Spread' =
+			VAR _Raw = "₹" & FORMAT([Avg Price Spread], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Where a gap exists"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average Price Gap</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 3b7c2405-3c38-48b8-b4a9-b4b49af7a791
+		dataCategory: ImageUrl
+
+	measure 'KPI Receipts' =
+			VAR _Raw = "₹" & FORMAT([Total Received Amount], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Four dated receipts"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='128' viewBox='0 0 400 128'>" &
+			    "<rect x='0.5' y='0.5' width='399' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Recorded Receipts</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: ac885691-b720-48b3-8258-fc2f46be2da6
+		dataCategory: ImageUrl
+
+	measure 'KPI Expense Total' =
+			VAR _Raw = "₹" & FORMAT([Total Recorded Expenses], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "13 undated line items"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='128' viewBox='0 0 400 128'>" &
+			    "<rect x='0.5' y='0.5' width='399' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Recorded Expenses</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 07faab75-793a-4a91-bbc8-74b03e00994d
+		dataCategory: ImageUrl
+
+	measure 'KPI Balance' =
+			VAR _Raw = "₹" & FORMAT([Recorded Net Cash Position], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Source sheet: Pending Amount. Not profit"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='128' viewBox='0 0 400 128'>" &
+			    "<rect x='0.5' y='0.5' width='399' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Recorded Balance Difference</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 9ba11ba1-16d6-462e-8374-491302b55573
+		dataCategory: ImageUrl
+
+	measure 'KPI Largest Expense' =
+			VAR _Raw = LEFT([Largest Expense Name], 22)
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "By recorded amount"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='128' viewBox='0 0 400 128'>" &
+			    "<rect x='0.5' y='0.5' width='399' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Largest Expense</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 90beaf4d-ff0c-47a8-9522-9a1c8b40a342
+		dataCategory: ImageUrl
+
+	measure 'Header Executive' =
+			VAR _Period = [Period Label]
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>SALES AND BUSINESS PERFORMANCE</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Executive Overview</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: ca11c395-15f2-4b7e-b274-9f63b646a307
+		dataCategory: ImageUrl
+
+	measure 'Header Amazon' =
+			VAR _Period = [Period Amazon]
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>MARKETPLACE PERFORMANCE</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Amazon Sales Intelligence</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 44eddb8a-8718-481a-87c9-beae7c7b348f
+		dataCategory: ImageUrl
+
+	measure 'Header International' =
+			VAR _Period = [Period International]
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>MULTI-CHANNEL EXPORT LEDGER</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>International Sales Intelligence</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 99ad5d99-7c36-405d-bfc1-fbc5062652d1
+		dataCategory: ImageUrl
+
+	measure 'Header Product' =
+			VAR _Period = [Period Amazon]
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>AMAZON SALES AGAINST RECORDED STOCK</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Product Performance and Inventory</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 5f8a8df2-70ff-4e55-a3f9-3eaca1a95ea4
+		dataCategory: ImageUrl
+
+	measure 'Header Pricing' =
+			VAR _Period = "Snapshots: March 2021 and May 2022"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>MRP SNAPSHOTS, NOT REVENUE</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Marketplace Pricing Intelligence</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 8d2053b9-cd05-4419-bec8-a93511cdc454
+		dataCategory: ImageUrl
+
+	measure 'Header Expense' =
+			VAR _Period = "Receipts dated 19 to 23 June 2022"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>IIGF EVENT CASH SHEET</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Expense and Cash Movement</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: e245b799-5da7-47f5-b4c6-78d84fe297f7
+		dataCategory: ImageUrl
+
+	measure 'Header Logistics' =
+			VAR _Period = "Undated reference chart"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>SHIPROCKET AND INCREFF</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Logistics and Warehouse Comparison</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c596fcbd-770a-4cb5-b752-394a463152ec
+		dataCategory: ImageUrl
+
+	measure 'Header Notes' =
+			VAR _Period = "Applies to every page"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>HOW EVERY NUMBER IS BUILT</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>Data Definitions and Limitations</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 07d185f4-99b6-4657-9184-b200e457aa4f
+		dataCategory: ImageUrl
+
+	measure 'Insights Executive' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='403' height='384' viewBox='0 0 403 384'>" &
+			    "<rect x='0.5' y='0.5' width='402' height='383' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Key business insights</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(IF(ISBLANK([Amazon Revenue]), "No Amazon sales in this selection", IF(ISBLANK([International Revenue]), "All recorded sales here are Amazon: ₹" & IF(ISBLANK([Amazon Revenue]), "—", IF(ABS([Amazon Revenue]) >= 1000000, FORMAT([Amazon Revenue] / 1000000, "0.0") & "M", IF(ABS([Amazon Revenue]) >= 1000, FORMAT([Amazon Revenue] / 1000, "0.0") & "K", FORMAT([Amazon Revenue], "#,0")))), "Amazon brings " & FORMAT([Amazon Sales Share %], "0%") & " of recorded sales: ₹" & IF(ISBLANK([Amazon Revenue]), "—", IF(ABS([Amazon Revenue]) >= 1000000, FORMAT([Amazon Revenue] / 1000000, "0.0") & "M", IF(ABS([Amazon Revenue]) >= 1000, FORMAT([Amazon Revenue] / 1000, "0.0") & "K", FORMAT([Amazon Revenue], "#,0")))) & " vs ₹" & IF(ISBLANK([International Revenue]), "—", IF(ABS([International Revenue]) >= 1000000, FORMAT([International Revenue] / 1000000, "0.0") & "M", IF(ABS([International Revenue]) >= 1000, FORMAT([International Revenue] / 1000, "0.0") & "K", FORMAT([International Revenue], "#,0")))))), "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(IF(ISBLANK([Amazon Revenue]), "", "Top 10 styles earn " & FORMAT([Top 10 Style Share %], "0%") & " of Amazon sales, led by " & [Top Style Name]), "&", "and") & "</text>" &
+			    "<text x='18' y='90' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(IF(ISBLANK([Amazon Revenue]), "", [Top State Name] & " is the largest Amazon market at " & FORMAT([Top State Share %], "0%") & " of sales"), "&", "and") & "</text>" &
+			    "<text x='18' y='109' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE(IF(ISBLANK([Amazon All Orders]), "", FORMAT([Amazon Cancellation Rate %], "0.0%") & " of Amazon orders were cancelled"), "&", "and") & "</text>" &
+			    "<text x='18' y='128' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE(IF(ISBLANK([Amazon All Orders]), "", "and " & FORMAT([Amazon Return Rate %], "0.0%") & " came back or failed in delivery"), "&", "and") & "</text>" &
+			    "<text x='18' y='147' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(IF(ISBLANK([International Revenue]), "No International sales in this selection", "Largest International buyer: " & LEFT([International Top Customer], 26)), "&", "and") & "</text>" &
+			    "<text x='18' y='166' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(IF(ISBLANK([International Revenue]), "", "at " & FORMAT([International Top Customer Share %], "0%") & " of that segment"), "&", "and") & "</text>" &
+			    "<text x='18' y='195' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#D6AC58'>" & SUBSTITUTE("READ THIS BEFORE COMPARING", "&", "and") & "</text>" &
+			    "<text x='18' y='214' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Amazon covers 31 Mar to 29 Jun 2022. International", "&", "and") & "</text>" &
+			    "<text x='18' y='233' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("covers 5 Jun 2021 to 11 May 2022. They overlap only", "&", "and") & "</text>" &
+			    "<text x='18' y='252' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("in Apr to May 2022, so totals are not like for like.", "&", "and") & "</text>" &
+			    "<text x='18' y='281' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("Net Profit: not available. COGS data is required.", "&", "and") & "</text>" &
+			    "<text x='18' y='300' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Expenses are one event sheet, not business costs.", "&", "and") & "</text>" &
+			    "<text x='18' y='319' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Stock and MRP are not sales and are excluded here.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 3c84d268-4610-4361-a474-90468a0d4ffe
+		dataCategory: ImageUrl
+
+	measure 'Insights Amazon' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='403' height='246' viewBox='0 0 403 246'>" &
+			    "<rect x='0.5' y='0.5' width='402' height='245' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("Sales count only Shipped and Delivered orders.", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE(IF(ISBLANK([Amazon All Orders]), "No Amazon orders in this selection", "Cancelled value not counted: ₹" & IF(ISBLANK([Amazon Cancelled Value]), "—", IF(ABS([Amazon Cancelled Value]) >= 1000000, FORMAT([Amazon Cancelled Value] / 1000000, "0.0") & "M", IF(ABS([Amazon Cancelled Value]) >= 1000, FORMAT([Amazon Cancelled Value] / 1000, "0.0") & "K", FORMAT([Amazon Cancelled Value], "#,0"))))), "&", "and") & "</text>" &
+			    "<text x='18' y='90' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE(IF(ISBLANK([Amazon All Orders]), "", "In progress orders not counted: " & FORMAT(0 + [Amazon In Progress Orders], "#,0")), "&", "and") & "</text>" &
+			    "<text x='18' y='109' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE(IF(ISBLANK([Amazon All Orders]), "", "Returned or failed orders: " & FORMAT(0 + [Amazon Returned Orders], "#,0")), "&", "and") & "</text>" &
+			    "<text x='18' y='138' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Nearly every order ships to India, so a country", "&", "and") & "</text>" &
+			    "<text x='18' y='157' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("chart would add nothing and is left out.", "&", "and") & "</text>" &
+			    "<text x='18' y='176' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("The 29 Jun cut-off makes June slightly short.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 7d886abd-76a4-47c6-a424-6cb96905dbcd
+		dataCategory: ImageUrl
+
+	measure 'Top 10 Color Stock' =
+			VAR R = IF(ISINSCOPE('Sale Report'[Color]) && [Total Stock] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('Sale Report'[Color]), [Total Stock] > 0 && NOT ISBLANK('Sale Report'[Color])), ORDERBY([Total Stock], DESC, 'Sale Report'[Color], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 10, [Total Stock])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 426bf73b-0d79-46f4-9af4-9d8775683f88
+
+	measure 'KPI Intl Customers' =
+			VAR _Raw = FORMAT([International Customers], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No data in selection", "Distinct billed names")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Customers</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: e7e639eb-1859-400b-bd39-1830b86763d4
+		dataCategory: ImageUrl
+
+	measure 'KPI Amazon Units Plain' =
+			VAR _Raw = IF(ISBLANK([Amazon Units Sold]), "—", IF(ABS([Amazon Units Sold]) >= 1000000, FORMAT([Amazon Units Sold] / 1000000, "0.0") & "M", IF(ABS([Amazon Units Sold]) >= 1000, FORMAT([Amazon Units Sold] / 1000, "0.0") & "K", FORMAT([Amazon Units Sold], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No data in selection", "Recognised orders only")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Units Sold]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Units Sold], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 237, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 251,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='265' height='128' viewBox='0 0 265 128'>" &
+			    "<rect x='0.5' y='0.5' width='264' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Units Sold</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: b413aa66-5787-4e00-8339-6e7cf61dd402
+		dataCategory: ImageUrl
+
+	measure 'Insights International' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='384' viewBox='0 0 320 384'>" &
+			    "<rect x='0.5' y='0.5' width='319' height='383' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Limits of this data</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("Multi-channel export ledger, not Amazon only.", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("No channel, city, state or country", "&", "and") & "</text>" &
+			    "<text x='18' y='90' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("field exists, so none is inferred.", "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Sales use original GROSS AMT.", "&", "and") & "</text>" &
+			    "<text x='18' y='138' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("PCS x RATE is kept separately.", "&", "and") & "</text>" &
+			    "<text x='18' y='167' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("May 2022 ends on the 11th, so that", "&", "and") & "</text>" &
+			    "<text x='18' y='186' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("month is partial.", "&", "and") & "</text>" &
+			    "<text x='18' y='205' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Currency is not stated in the file.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 4956c3b0-87ad-472b-9a4f-fb9d3a273210
+		dataCategory: ImageUrl
+
+	measure 'Insights Product' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='403' height='384' viewBox='0 0 403 384'>" &
+			    "<rect x='0.5' y='0.5' width='402' height='383' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(IF(ISBLANK([Amazon All Orders]), "No Amazon SKUs in this selection", FORMAT([SKU Match Coverage %], "0%") & " of Amazon SKUs have a stock record."), "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Unmatched SKUs are reported, not forced.", "&", "and") & "</text>" &
+			    "<text x='18' y='100' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("Stock is a single undated snapshot.", "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("Remaining stock and turnover cannot be", "&", "and") & "</text>" &
+			    "<text x='18' y='138' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("calculated without inventory history.", "&", "and") & "</text>" &
+			    "<text x='18' y='167' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Date filters change units and sales.", "&", "and") & "</text>" &
+			    "<text x='18' y='186' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("They do not change recorded stock.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 1c0b9bcf-6c92-40d9-8015-c8f835befe29
+		dataCategory: ImageUrl
+
+	measure 'Insights Pricing' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='403' height='406' viewBox='0 0 403 406'>" &
+			    "<rect x='0.5' y='0.5' width='402' height='405' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE(FORMAT([Products With Price Variation], "#,0") & " products have different MRPs across", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("marketplaces, with an average gap of ₹" & FORMAT([Avg Price Spread], "#,0"), "&", "and") & "</text>" &
+			    "<text x='18' y='90' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("and a maximum of ₹" & FORMAT([Max Price Spread], "#,0"), "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#D6AC58'>" & SUBSTITUTE("NO PRICE MOVEMENT BETWEEN SNAPSHOTS", "&", "and") & "</text>" &
+			    "<text x='18' y='138' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Mar 2021 and May 2022 hold identical MRPs for", "&", "and") & "</text>" &
+			    "<text x='18' y='157' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("every product. Amazon MRP changes: " & FORMAT([Snapshot Price Changes], "0"), "&", "and") & "</text>" &
+			    "<text x='18' y='176' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("The two files may be one price list.", "&", "and") & "</text>" &
+			    "<text x='18' y='205' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("MRP is a list price, never revenue.", "&", "and") & "</text>" &
+			    "<text x='18' y='224' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("These SKU codes match no sales table,", "&", "and") & "</text>" &
+			    "<text x='18' y='243' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("so price and sales are not compared.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: db0b54cf-44af-449a-af71-fceb86110fdc
+		dataCategory: ImageUrl
+
+	measure 'Insights Expense' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='816' height='396' viewBox='0 0 816 396'>" &
+			    "<rect x='0.5' y='0.5' width='815' height='395' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("This sheet appears to record one event (IIGF, June 2022): travel, hotel, labour and sundries.", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("It is not the cost base of the sales business, so it must not be netted against sales.", "&", "and") & "</text>" &
+			    "<text x='18' y='100' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("The difference of ₹" & FORMAT([Recorded Net Cash Position], "#,0") & " matches the Pending Amount row on the sheet.", "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("It means spending exceeded receipts on this sheet. It is not a profit or loss.", "&", "and") & "</text>" &
+			    "<text x='18' y='148' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Expense lines have no dates, so no expense timeline is possible.", "&", "and") & "</text>" &
+			    "<text x='18' y='167' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("The date on each row belongs to the receipt beside it, not to the expense.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 250e08d4-c891-4d90-b926-e4dc24c53783
+		dataCategory: ImageUrl
+
+	measure 'Insights Logistics' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='636' height='340' viewBox='0 0 636 340'>" &
+			    "<rect x='0.5' y='0.5' width='635' height='339' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("Shiprocket is cheaper on outbound and customer returns.", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("Inbound is the same price at both providers.", "&", "and") & "</text>" &
+			    "<text x='18' y='100' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("Storage is left out of the chart because the units differ:", "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("Shiprocket quotes 25 per cft, INCREFF 0.15 per day.", "&", "and") & "</text>" &
+			    "<text x='18' y='148' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Rates are reference prices with no stated unit of volume.", "&", "and") & "</text>" &
+			    "<text x='18' y='167' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("They are not realised costs and are not part of any sales figure.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: a4e63302-14d9-452e-ba25-31cbf04d6fb9
+		dataCategory: ImageUrl
+
+	measure 'Rail Executive' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><rect x='12' y='104' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='114' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c7aec3d9-68d3-4fb0-aaf2-06baa279d27b
+		dataCategory: ImageUrl
+
+	measure 'Rail Amazon' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><rect x='12' y='150' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='160' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 07b78157-e135-4788-baf9-cf55cb8074d3
+		dataCategory: ImageUrl
+
+	measure 'Rail International' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><rect x='12' y='196' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='206' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 9bdc5174-5c8a-4c74-9a4b-130f05e3061a
+		dataCategory: ImageUrl
+
+	measure 'Rail Product' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><rect x='12' y='242' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='252' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: a144dbf5-4919-47dd-bd3f-9f8dbb98fc8f
+		dataCategory: ImageUrl
+
+	measure 'Rail Pricing' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><rect x='12' y='288' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='298' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 1deb8776-327e-4a37-81a5-0000a8967ca9
+		dataCategory: ImageUrl
+
+	measure 'Rail Expense' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><rect x='12' y='334' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='344' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 838e863d-a255-47a2-8d44-d272e46d01e8
+		dataCategory: ImageUrl
+
+	measure 'Rail Logistics' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><rect x='12' y='380' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='390' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Logistics</text><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: a4498eac-e43b-4c31-af96-7d7acac6dee1
+		dataCategory: ImageUrl
+
+	measure 'Rail Notes' = VAR _Svg = "<svg xmlns='http://www.w3.org/2000/svg' width='216' height='1080' viewBox='0 0 216 1080'><rect width='216' height='1080' fill='#0E0E0E'/><rect x='215' width='1' height='1080' fill='#1F1F1F'/><text x='28' y='48' font-family='Segoe UI, sans-serif' font-size='19' font-weight='600' letter-spacing='1' fill='#D6AC58'>SALES</text><text x='28' y='68' font-family='Segoe UI, sans-serif' font-size='11' letter-spacing='1.6' fill='#A5A5A5'>INTELLIGENCE</text><text x='28' y='130' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Executive Overview</text><text x='28' y='176' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Amazon Sales</text><text x='28' y='222' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>International Sales</text><text x='28' y='268' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Products and Stock</text><text x='28' y='314' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Marketplace Pricing</text><text x='28' y='360' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Expenses and Cash</text><text x='28' y='406' font-family='Segoe UI, sans-serif' font-size='13.5' fill='#A5A5A5'>Logistics</text><rect x='12' y='426' width='192' height='42' rx='8' fill='#1B1810'/><rect x='12' y='436' width='3' height='22' rx='1.5' fill='#D6AC58'/><text x='28' y='452' font-family='Segoe UI, sans-serif' font-size='13.5' font-weight='600' fill='#D6AC58'>Data Notes</text><text x='28' y='982' font-family='Segoe UI, sans-serif' font-size='10' fill='#6E6E6E'>In Desktop, Ctrl + click to navigate</text></svg>" RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 7cc4aea9-78f4-48ea-aa85-6653d2df06f5
+		dataCategory: ImageUrl
+
+	measure 'Stock Category Rank' =
+			IF(
+			    ISINSCOPE('Sale Report'[Category]) && [Total Stock] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('Sale Report'[Category]), [Total Stock] > 0 && NOT ISBLANK('Sale Report'[Category])), ORDERBY([Total Stock], DESC, 'Sale Report'[Category], ASC))
+			)
+		formatString: 0
+		displayFolder: 6. Inventory
+		lineageTag: bc4d6686-4660-4e34-bfb5-282bc3aea7de
+
+	measure 'Top 8 Category Stock' = VAR R = [Stock Category Rank] RETURN IF(NOT ISBLANK(R) && R <= 8, [Total Stock])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 3f163b8b-307a-4ff6-9b9f-e499e2611bb6
+
+	measure 'Top 8 Category Units' = VAR R = [Stock Category Rank] RETURN IF(NOT ISBLANK(R) && R <= 8, [Units Sold on Matched SKUs])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: 2aa1b73b-8d9f-4be1-afee-76ceaef9d487
+
+	measure 'Period Amazon' = VAR _D1 = CALCULATE(MIN('Amazon Sale Report'[Date])) VAR _D2 = CALCULATE(MAX('Amazon Sale Report'[Date])) RETURN IF(ISBLANK(_D1), "No data in selection", "Amazon  ·  " & FORMAT(_D1, "d MMM yyyy") & " to " & FORMAT(_D2, "d MMM yyyy"))
+		displayFolder: 3. Combined
+		lineageTag: 9732552b-2610-46a0-87a7-df6e755eaf76
+
+	measure 'Period International' = VAR _D1 = CALCULATE(MIN('International sale Report'[DATE])) VAR _D2 = CALCULATE(MAX('International sale Report'[DATE])) RETURN IF(ISBLANK(_D1), "No data in selection", "International  ·  " & FORMAT(_D1, "d MMM yyyy") & " to " & FORMAT(_D2, "d MMM yyyy"))
+		displayFolder: 3. Combined
+		lineageTag: 94c6861e-5f6e-48ff-926b-f4a772b4fe26
+
+	measure 'Amazon Order Value' = SUM('Amazon Sale Report'[Amount])
+		formatString: \₹#,0
+		displayFolder: 1. Amazon
+		lineageTag: 08d4ae96-7c62-4bb4-b63f-0c5171162bc6
+
+	measure 'Marketplace Min MRP' =
+			SWITCH(
+			    SELECTEDVALUE(Marketplace[Marketplace]),
+			    "Amazon", MIN('May-2022'[Amazon MRP]),
+			    "Amazon FBA", MIN('May-2022'[Amazon FBA MRP]),
+			    "Flipkart", MIN('May-2022'[Flipkart MRP]),
+			    "Myntra", MIN('May-2022'[Myntra MRP]),
+			    "Ajio", MIN('May-2022'[Ajio MRP]),
+			    "Snapdeal", MIN('May-2022'[Snapdeal MRP]),
+			    "Paytm", MIN('May-2022'[Paytm MRP]),
+			    "Limeroad", MIN('May-2022'[Limeroad MRP])
+			)
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: c66bb3d5-ff48-4f3a-8064-09f2c8ab118d
+
+	measure 'Marketplace Max MRP' =
+			SWITCH(
+			    SELECTEDVALUE(Marketplace[Marketplace]),
+			    "Amazon", MAX('May-2022'[Amazon MRP]),
+			    "Amazon FBA", MAX('May-2022'[Amazon FBA MRP]),
+			    "Flipkart", MAX('May-2022'[Flipkart MRP]),
+			    "Myntra", MAX('May-2022'[Myntra MRP]),
+			    "Ajio", MAX('May-2022'[Ajio MRP]),
+			    "Snapdeal", MAX('May-2022'[Snapdeal MRP]),
+			    "Paytm", MAX('May-2022'[Paytm MRP]),
+			    "Limeroad", MAX('May-2022'[Limeroad MRP])
+			)
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 92f790ee-698b-4320-a282-44a0b3dc9835
+
+	measure 'Selected SKU' = IF(HASONEVALUE(DimSKU[SKU_Key]), VALUES(DimSKU[SKU_Key]), "All SKUs. Right-click a SKU to drill through")
+		displayFolder: 6. Inventory
+		lineageTag: 7026e490-d969-489a-b485-8d184843ab3f
+
+	measure 'SKU Amazon Sales Share %' = DIVIDE([Amazon Revenue], CALCULATE([Amazon Revenue], REMOVEFILTERS(DimSKU)))
+		formatString: 0.00%
+		displayFolder: 6. Inventory
+		lineageTag: 157e67f9-6b1c-418a-a6dc-c5a7fe5815e6
+
+	measure 'SKU Category' = VAR _V = MAX('Amazon Sale Report'[Category]) RETURN IF(LEN(_V) > 0, _V, VAR _V = MAX('Sale Report'[Category]) RETURN IF(LEN(_V) > 0, _V, ""))
+		displayFolder: 6. Inventory
+		lineageTag: fb6caa1e-0fc9-483f-8e04-2819af28a51e
+
+	measure 'SKU Style' = VAR _V = MAX('Amazon Sale Report'[Style]) RETURN IF(LEN(_V) > 0, _V, VAR _V = MAX('International sale Report'[Style]) RETURN IF(LEN(_V) > 0, _V, ""))
+		displayFolder: 6. Inventory
+		lineageTag: 336c8285-e249-4889-b38d-5a6df047bd6a
+
+	measure 'SKU Size' = VAR _V = MAX('Amazon Sale Report'[Size]) RETURN IF(LEN(_V) > 0, _V, VAR _V = MAX('Sale Report'[Size]) RETURN IF(LEN(_V) > 0, _V, VAR _V = MAX('International sale Report'[Final Size]) RETURN IF(LEN(_V) > 0, _V, "")))
+		displayFolder: 6. Inventory
+		lineageTag: ccbb9884-26eb-4ee0-8f96-96a2dcbe7256
+
+	measure 'SKU Colour' = VAR _V = MAX('Sale Report'[Color]) RETURN IF(LEN(_V) > 0, _V, "")
+		displayFolder: 6. Inventory
+		lineageTag: 528573f2-bd58-43bf-9819-bf800fc44eb8
+
+	measure 'SKU Attributes' =
+			IF(HASONEVALUE(DimSKU[SKU_Key]),
+			    "SKU DETAIL" &
+			    IF(LEN([SKU Category]) > 0, "  ·  " & UPPER([SKU Category])) &
+			    IF(LEN([SKU Style]) > 0, "  ·  STYLE " & [SKU Style]) &
+			    IF(LEN([SKU Size]) > 0, "  ·  SIZE " & [SKU Size]) &
+			    IF(LEN([SKU Colour]) > 0, "  ·  " & UPPER([SKU Colour])),
+			    "SKU DETAIL")
+		displayFolder: 6. Inventory
+		lineageTag: 7f159cad-1add-46a5-95b5-790c4ae338e4
+
+	measure 'Marketplace Selected' = IF(HASONEVALUE(Marketplace[Marketplace]), VALUES(Marketplace[Marketplace]), "All marketplaces")
+		displayFolder: 7. Pricing
+		lineageTag: fb908ea1-6adf-4982-9afb-7d95e5908ec2
+
+	measure 'Marketplace Highest MRP Products' = 0 + COUNTROWS(FILTER('May-2022', VAR P = SWITCH(SELECTEDVALUE(Marketplace[Marketplace]), "Amazon", 'May-2022'[Amazon MRP], "Amazon FBA", 'May-2022'[Amazon FBA MRP], "Flipkart", 'May-2022'[Flipkart MRP], "Myntra", 'May-2022'[Myntra MRP], "Ajio", 'May-2022'[Ajio MRP], "Snapdeal", 'May-2022'[Snapdeal MRP], "Paytm", 'May-2022'[Paytm MRP], "Limeroad", 'May-2022'[Limeroad MRP]) VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) VAR Hi = MAXX(Valid, [Value]) VAR Lo = MINX(Valid, [Value]) RETURN NOT ISBLANK(P) && Hi > Lo && P = Hi))
+		formatString: #,0
+		displayFolder: 7. Pricing
+		lineageTag: cac556cc-a8ec-4e1f-9530-e307b4750432
+
+	measure 'Marketplace Lowest MRP Products' = 0 + COUNTROWS(FILTER('May-2022', VAR P = SWITCH(SELECTEDVALUE(Marketplace[Marketplace]), "Amazon", 'May-2022'[Amazon MRP], "Amazon FBA", 'May-2022'[Amazon FBA MRP], "Flipkart", 'May-2022'[Flipkart MRP], "Myntra", 'May-2022'[Myntra MRP], "Ajio", 'May-2022'[Ajio MRP], "Snapdeal", 'May-2022'[Snapdeal MRP], "Paytm", 'May-2022'[Paytm MRP], "Limeroad", 'May-2022'[Limeroad MRP]) VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) VAR Hi = MAXX(Valid, [Value]) VAR Lo = MINX(Valid, [Value]) RETURN NOT ISBLANK(P) && Hi > Lo && P = Lo))
+		formatString: #,0
+		displayFolder: 7. Pricing
+		lineageTag: a9f0d733-ed1f-43b8-a6c5-28c3038a7742
+
+	measure 'Product Lowest MRP' = IF(HASONEVALUE('May-2022'[Sku]), MAXX('May-2022', VAR P = SWITCH(SELECTEDVALUE(Marketplace[Marketplace]), "Amazon", 'May-2022'[Amazon MRP], "Amazon FBA", 'May-2022'[Amazon FBA MRP], "Flipkart", 'May-2022'[Flipkart MRP], "Myntra", 'May-2022'[Myntra MRP], "Ajio", 'May-2022'[Ajio MRP], "Snapdeal", 'May-2022'[Snapdeal MRP], "Paytm", 'May-2022'[Paytm MRP], "Limeroad", 'May-2022'[Limeroad MRP]) VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) VAR Hi = MAXX(Valid, [Value]) VAR Lo = MINX(Valid, [Value]) RETURN Lo))
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 359e0614-e170-4766-a82c-d40f61c25470
+
+	measure 'Marketplace Product Gap' = IF(HASONEVALUE('May-2022'[Sku]), MAXX('May-2022', VAR P = SWITCH(SELECTEDVALUE(Marketplace[Marketplace]), "Amazon", 'May-2022'[Amazon MRP], "Amazon FBA", 'May-2022'[Amazon FBA MRP], "Flipkart", 'May-2022'[Flipkart MRP], "Myntra", 'May-2022'[Myntra MRP], "Ajio", 'May-2022'[Ajio MRP], "Snapdeal", 'May-2022'[Snapdeal MRP], "Paytm", 'May-2022'[Paytm MRP], "Limeroad", 'May-2022'[Limeroad MRP]) VAR Prices = {'May-2022'[Amazon MRP], 'May-2022'[Amazon FBA MRP], 'May-2022'[Flipkart MRP], 'May-2022'[Myntra MRP], 'May-2022'[Ajio MRP], 'May-2022'[Snapdeal MRP], 'May-2022'[Paytm MRP], 'May-2022'[Limeroad MRP]} VAR Valid = FILTER(Prices, NOT ISBLANK([Value])) VAR Hi = MAXX(Valid, [Value]) VAR Lo = MINX(Valid, [Value]) RETURN IF(NOT ISBLANK(P), P - Lo)))
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 23c6876d-7ebe-4b12-8cc0-3ecc714ff3a8
+
+	measure 'Top 15 Marketplace Gap' =
+			VAR R = IF(ISINSCOPE('May-2022'[Sku]) && [Marketplace Product Gap] > 0,
+			    ROWNUMBER(FILTER(ALLSELECTED('May-2022'[Sku]), [Marketplace Product Gap] > 0), ORDERBY([Marketplace Product Gap], DESC, 'May-2022'[Sku], ASC)))
+			RETURN IF(NOT ISBLANK(R) && R <= 15, [Marketplace Product Gap])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: cfa7ba03-d1a1-434c-9c7d-ad5c76f9af7b
+
+	measure 'All Marketplaces Avg MRP' = DIVIDE(SUM('May-2022'[Amazon MRP]) + SUM('May-2022'[Amazon FBA MRP]) + SUM('May-2022'[Flipkart MRP]) + SUM('May-2022'[Myntra MRP]) + SUM('May-2022'[Ajio MRP]) + SUM('May-2022'[Snapdeal MRP]) + SUM('May-2022'[Paytm MRP]) + SUM('May-2022'[Limeroad MRP]), COUNT('May-2022'[Amazon MRP]) + COUNT('May-2022'[Amazon FBA MRP]) + COUNT('May-2022'[Flipkart MRP]) + COUNT('May-2022'[Myntra MRP]) + COUNT('May-2022'[Ajio MRP]) + COUNT('May-2022'[Snapdeal MRP]) + COUNT('May-2022'[Paytm MRP]) + COUNT('May-2022'[Limeroad MRP]))
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: a3f019d0-00bf-4b78-b74f-ce89a4e709d8
+
+	measure 'Marketplace Avg vs All %' = DIVIDE([Marketplace Avg MRP May 2022] - [All Marketplaces Avg MRP], [All Marketplaces Avg MRP])
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 7. Pricing
+		lineageTag: 62db3d74-e5d4-4354-a4c9-48fd7c404a38
+
+	measure 'Marketplace MRP Rank' = IF(HASONEVALUE(Marketplace[Marketplace]), RANKX(ALL(Marketplace[Marketplace]), [Marketplace Avg MRP May 2022], , DESC))
+		formatString: 0
+		displayFolder: 7. Pricing
+		lineageTag: 30c7138f-c62d-4923-8cd7-1c7a8ce295bb
+
+	measure 'KPI SKU Sales' =
+			VAR _Raw = IF(ISBLANK([Amazon Revenue]), "—", "₹" & IF(ISBLANK([Amazon Revenue]), "—", IF(ABS([Amazon Revenue]) >= 1000000, FORMAT([Amazon Revenue] / 1000000, "0.0") & "M", IF(ABS([Amazon Revenue]) >= 1000, FORMAT([Amazon Revenue] / 1000, "0.0") & "K", FORMAT([Amazon Revenue], "#,0")))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon Revenue]), "No recognised Amazon sale", FORMAT([SKU Amazon Sales Share %], "0.00%") & " of Amazon sales")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Revenue]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Revenue], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Recorded Sales</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 1185eb3a-cd6d-45aa-ab92-b372ee8d6979
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Units' =
+			VAR _Raw = IF(ISBLANK([Amazon Units Sold]), "—", IF(ABS([Amazon Units Sold]) >= 1000000, FORMAT([Amazon Units Sold] / 1000000, "0.0") & "M", IF(ABS([Amazon Units Sold]) >= 1000, FORMAT([Amazon Units Sold] / 1000, "0.0") & "K", FORMAT([Amazon Units Sold], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon Units Sold]), "Recognised orders only", "Avg price ₹" & FORMAT([Amazon Average Selling Price], "#,0"))
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Date]), NOT ISBLANK([Amazon Units Sold]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [Amazon Units Sold], "@i", RANKX(_Base, DimDate[Date], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#D6AC58' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#D6AC58' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Units Sold</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 6707eff1-04b1-460f-a130-376aaf576405
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Orders' =
+			VAR _Raw = IF(ISBLANK([Amazon Orders]), "—", IF(ABS([Amazon Orders]) >= 1000000, FORMAT([Amazon Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Orders]) >= 1000, FORMAT([Amazon Orders] / 1000, "0.0") & "K", FORMAT([Amazon Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = FORMAT(0 + [Amazon All Orders], "#,0") & " including all outcomes"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Amazon Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 55368da2-05f4-4e0d-86bf-cc5cbb829829
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Cancelled' =
+			VAR _Raw = IF(ISBLANK([Amazon Cancelled Orders]), "—", IF(ABS([Amazon Cancelled Orders]) >= 1000000, FORMAT([Amazon Cancelled Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Cancelled Orders]) >= 1000, FORMAT([Amazon Cancelled Orders] / 1000, "0.0") & "K", FORMAT([Amazon Cancelled Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No Amazon orders", FORMAT(0 + [Amazon Cancellation Rate %], "0.0%") & " of all orders")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Cancelled Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 1dca494a-44b8-4f8f-ae12-8bf5ff4dad0f
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Returned' =
+			VAR _Raw = IF(ISBLANK([Amazon Returned Orders]), "—", IF(ABS([Amazon Returned Orders]) >= 1000000, FORMAT([Amazon Returned Orders] / 1000000, "0.0") & "M", IF(ABS([Amazon Returned Orders]) >= 1000, FORMAT([Amazon Returned Orders] / 1000, "0.0") & "K", FORMAT([Amazon Returned Orders], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Amazon All Orders]), "No Amazon orders", FORMAT(0 + [Amazon Return Rate %], "0.0%") & " of all orders")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Returned / Failed Orders</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 24d5dbe4-a4f0-4c24-82e8-3265f349c284
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Stock' =
+			VAR _Raw = IF(ISBLANK([Total Stock]), "—", IF(ABS([Total Stock]) >= 1000000, FORMAT([Total Stock] / 1000000, "0.0") & "M", IF(ABS([Total Stock]) >= 1000, FORMAT([Total Stock] / 1000, "0.0") & "K", FORMAT([Total Stock], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([Total Stock]), "No stock record for this SKU", "Undated snapshot")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Recorded Stock (Units)</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 0f8aeb07-e071-45c6-bb51-2ffa3f44dd7e
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Intl Sales' =
+			VAR _Raw = IF(ISBLANK([International Revenue]), "—", "₹" & IF(ISBLANK([International Revenue]), "—", IF(ABS([International Revenue]) >= 1000000, FORMAT([International Revenue] / 1000000, "0.0") & "M", IF(ABS([International Revenue]) >= 1000, FORMAT([International Revenue] / 1000, "0.0") & "K", FORMAT([International Revenue], "#,0")))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = IF(ISBLANK([International Revenue]), "No International line", FORMAT([International Customers], "#,0") & " customers")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Base = FILTER(VALUES(DimDate[Year Month Sort]), NOT ISBLANK([International Revenue]))
+			VAR _Vals = ADDCOLUMNS(_Base, "@v", [International Revenue], "@i", RANKX(_Base, DimDate[Year Month Sort], , ASC))
+			VAR _N = COUNTROWS(_Vals)
+			VAR _Min = MINX(_Vals, [@v])
+			VAR _Max = MAXX(_Vals, [@v])
+			VAR _Pts = CONCATENATEX(
+			    _Vals,
+			    FORMAT(14 + DIVIDE([@i] - 1, MAX(_N - 1, 1)) * 167, "0.0") & "," & FORMAT(116 - DIVIDE([@v] - _Min, MAX(_Max - _Min, 1)) * 30, "0.0"),
+			    " ", [@i], ASC
+			)
+			VAR _Spark = IF(_N >= 2,
+			    "<polygon points='14,116 " & _Pts & " 181,116' fill='#58A6A6' fill-opacity='0.12'/>" &
+			    "<polyline points='" & _Pts & "' fill='none' stroke='#58A6A6' stroke-width='1.6' stroke-linejoin='round'/>")
+			
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>International Sales</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" & _Spark &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 128cacc1-e8df-41c6-b3d2-0d9f41a38224
+		dataCategory: ImageUrl
+
+	measure 'KPI SKU Intl Units' =
+			VAR _Raw = IF(ISBLANK([International Units]), "—", IF(ABS([International Units]) >= 1000000, FORMAT([International Units] / 1000000, "0.0") & "M", IF(ABS([International Units]) >= 1000, FORMAT([International Units] / 1000, "0.0") & "K", FORMAT([International Units], "#,0"))))
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Apr to May 2022 lines carry no SKU"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='195' height='128' viewBox='0 0 195 128'>" &
+			    "<rect x='0.5' y='0.5' width='194' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>International Units</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 9f393a7a-e11d-4a28-82ea-727a679d0219
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Avg' =
+			VAR _Raw = "₹" & FORMAT([Marketplace Avg MRP May 2022], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "All marketplaces ₹" & FORMAT([All Marketplaces Avg MRP], "#,0")
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Average MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 41e4d67d-acb0-46c6-847b-9f915e62d1a5
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Vs All' =
+			VAR _Raw = FORMAT([Marketplace Avg vs All %], "+0.0%;-0.0%;0.0%")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Difference in average MRP"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#D6AC58'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Against All Marketplaces</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: af06a25c-4801-4270-aa54-5b00a9c4346c
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Rank' =
+			VAR _Raw = IF(ISBLANK([Marketplace MRP Rank]), "—", "#" & [Marketplace MRP Rank])
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Of 8. Ties share a rank"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Rank by Average MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: d68119e8-dba6-434f-bdfc-c6c8f8ac1414
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Range' =
+			VAR _Raw = "₹" & FORMAT([Marketplace Min MRP], "#,0") & " – ₹" & FORMAT([Marketplace Max MRP], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Lowest to highest listed"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#956BC4'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>MRP Range</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 895b1ace-98a6-40f0-a590-5151c7f2d361
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Priced' =
+			VAR _Raw = FORMAT([Marketplace Priced Products], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = FORMAT([Marketplace Coverage %], "0.0%") & " of listed products"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#58A6A6'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Products Priced</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 617ce65b-f53c-44bd-b21c-e6c4ec96c3a5
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Highest' =
+			VAR _Raw = FORMAT([Marketplace Highest MRP Products], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Only where marketplaces differ"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#E77D67'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Products at Highest MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: cec20bcf-3ae8-4500-bb3e-2fa87e00d391
+		dataCategory: ImageUrl
+
+	measure 'KPI MP Lowest' =
+			VAR _Raw = FORMAT([Marketplace Lowest MRP Products], "#,0")
+			VAR _Value = IF(_Raw = "" || _Raw = "₹" || _Raw = "₹—", "—", _Raw)
+			VAR _Sub = "Only where marketplaces differ"
+			VAR _SubColor = "#8A8A8A"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='225' height='128' viewBox='0 0 225 128'>" &
+			    "<rect x='0.5' y='0.5' width='224' height='127' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<rect x='14' y='0' width='26' height='2' fill='#65C99A'/>" &
+			    "<text x='14' y='24' font-family='Segoe UI, sans-serif' font-size='11' fill='#A5A5A5'>Products at Lowest MRP</text>" &
+			    "<text x='14' y='56' font-family='Segoe UI, sans-serif' font-size='27' font-weight='600' fill='#F2F2F2'>" & _Value & "</text>" &
+			    "<text x='14' y='74' font-family='Segoe UI, sans-serif' font-size='10.5' fill='" & _SubColor & "'>" & SUBSTITUTE(_Sub, "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 014c9262-ac1a-473e-9589-f9ab3564a66b
+		dataCategory: ImageUrl
+
+	measure 'Header SkuDetail' =
+			VAR _Title = [Selected SKU]
+			VAR _Eyebrow = [SKU Attributes]
+			VAR _Period = [Period Label]
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>" & SUBSTITUTE(_Eyebrow, "&", "and") & "</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>" & SUBSTITUTE(_Title, "&", "and") & "</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "<rect x='1498.5' y='0.5' width='149' height='29' rx='8' fill='#141414' stroke='#262626'/>" &
+			    "<text x='1573' y='19' text-anchor='middle' font-family='Segoe UI, sans-serif' font-size='12' fill='#A5A5A5'>Back to previous page</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 356cfac4-89ff-43a7-9b56-be03c3aae374
+		dataCategory: ImageUrl
+
+	measure 'Header MarketplaceDetail' =
+			VAR _Title = [Marketplace Selected]
+			VAR _Eyebrow = "MARKETPLACE DETAIL  ·  MRP, NOT REVENUE"
+			VAR _Period = "May 2022 snapshot"
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='64' viewBox='0 0 1648 64'>" &
+			    "<text x='0' y='17' font-family='Segoe UI, sans-serif' font-size='12' letter-spacing='1.6' fill='#D6AC58'>" & SUBSTITUTE(_Eyebrow, "&", "and") & "</text>" &
+			    "<text x='0' y='50' font-family='Segoe UI, sans-serif' font-size='30' font-weight='600' fill='#F2F2F2'>" & SUBSTITUTE(_Title, "&", "and") & "</text>" &
+			    "<text x='1648' y='50' text-anchor='end' font-family='Segoe UI, sans-serif' font-size='13' fill='#A5A5A5'>" & _Period & "</text>" &
+			    "<rect x='1498.5' y='0.5' width='149' height='29' rx='8' fill='#141414' stroke='#262626'/>" &
+			    "<text x='1573' y='19' text-anchor='middle' font-family='Segoe UI, sans-serif' font-size='12' fill='#A5A5A5'>Back to previous page</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: c4ea0923-b664-4494-8888-ef42562fda6b
+		dataCategory: ImageUrl
+
+	measure 'Insights SkuDetail' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='403' height='384' viewBox='0 0 403 384'>" &
+			    "<rect x='0.5' y='0.5' width='402' height='383' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("Sales count only Shipped and Delivered orders.", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Cancelled and returned orders are shown", "&", "and") & "</text>" &
+			    "<text x='18' y='90' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("but never added to sales.", "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#D6AC58'>" & SUBSTITUTE("STOCK IS NOT COMPARED OVER TIME", "&", "and") & "</text>" &
+			    "<text x='18' y='138' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("Stock is one undated snapshot, so no turnover", "&", "and") & "</text>" &
+			    "<text x='18' y='157' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("or days of cover can be calculated.", "&", "and") & "</text>" &
+			    "<text x='18' y='176' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("A blank stock card means no record, not zero.", "&", "and") & "</text>" &
+			    "<text x='18' y='205' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("International Apr to May 2022 lines have no SKU,", "&", "and") & "</text>" &
+			    "<text x='18' y='224' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("so International sales for this SKU may be higher.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: 8c8f6bb2-df12-4dcc-9e05-91bfb40c161e
+		dataCategory: ImageUrl
+
+	measure 'Insights MarketplaceDetail' =
+			VAR _Svg =
+			    "<svg xmlns='http://www.w3.org/2000/svg' width='403' height='384' viewBox='0 0 403 384'>" &
+			    "<rect x='0.5' y='0.5' width='402' height='383' rx='10' fill='#141414' stroke='#262626'/>" &
+			    "<text x='18' y='30' font-family='Segoe UI, sans-serif' font-size='14' font-weight='600' fill='#F2F2F2'>Reading this page</text>" &
+			    "<text x='18' y='52' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE([Marketplace Selected] & " has a price for " & FORMAT([Marketplace Priced Products], "#,0") & " of 1,330 products.", "&", "and") & "</text>" &
+			    "<text x='18' y='71' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E6E6E6'>" & SUBSTITUTE("Average MRP is " & FORMAT([Marketplace Avg vs All %], "+0.0%;-0.0%;0.0%") & " against all marketplaces.", "&", "and") & "</text>" &
+			    "<text x='18' y='100' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#D6AC58'>" & SUBSTITUTE("MRP IS A LIST PRICE, NEVER REVENUE", "&", "and") & "</text>" &
+			    "<text x='18' y='119' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("These prices do not show what sold on this", "&", "and") & "</text>" &
+			    "<text x='18' y='138' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("marketplace. Only Amazon has sales data here,", "&", "and") & "</text>" &
+			    "<text x='18' y='157' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#9A9A9A'>" & SUBSTITUTE("and these SKU codes match no sales table.", "&", "and") & "</text>" &
+			    "<text x='18' y='186' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("March 2021 holds identical MRPs,", "&", "and") & "</text>" &
+			    "<text x='18' y='205' font-family='Segoe UI, sans-serif' font-size='12.5' fill='#E77D67'>" & SUBSTITUTE("so no price change can be shown.", "&", "and") & "</text>" &
+			    "</svg>"
+			RETURN "data:image/svg+xml;utf8," & SUBSTITUTE(SUBSTITUTE(_Svg, "%", "%25"), "#", "%23")
+		displayFolder: SVG
+		lineageTag: a8fa6b40-c1e2-4a71-814a-9f0567c48c08
+		dataCategory: ImageUrl
+
+	measure 'Amazon Latest Month Per Day MoM %' =
+			VAR LatestDay = CALCULATE(MAX('Amazon Sale Report'[Date]), 'Amazon Sale Report'[Status Group] = "Recognised Sale")
+			VAR CurrentRange = DATESBETWEEN(DimDate[Date], EOMONTH(LatestDay, -1) + 1, EOMONTH(LatestDay, 0))
+			VAR PriorRange = DATESBETWEEN(DimDate[Date], EOMONTH(LatestDay, -2) + 1, EOMONTH(LatestDay, -1))
+			VAR CurrentRate = DIVIDE(CALCULATE([Amazon Revenue], CurrentRange), CALCULATE([Amazon Trading Days], CurrentRange))
+			VAR PriorRate = DIVIDE(CALCULATE([Amazon Revenue], PriorRange), CALCULATE([Amazon Trading Days], PriorRange))
+			RETURN IF(NOT ISBLANK([Amazon Latest Month MoM %]), DIVIDE(CurrentRate - PriorRate, PriorRate))
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 1. Amazon
+		lineageTag: 60775182-3ead-4d82-aae2-71e5e7edcdd2
+
+	measure 'Top 15 SKU Sales' = IF(NOT ISBLANK([Top 15 SKU Units]), [Amazon Revenue])
+		formatString: \₹#,0
+		displayFolder: 6. Inventory
+		lineageTag: ba6f5c4f-46b8-41c5-9aad-a4e25684a61b
+
+	measure 'Top 15 SKU Stock' = IF(NOT ISBLANK([Top 15 SKU Units]), [Total Stock])
+		formatString: #,0
+		displayFolder: 6. Inventory
+		lineageTag: dbf9c25c-f9e5-402c-b92b-c0ee51de3f60
+
+	measure 'Top 15 Marketplace MRP' = IF(NOT ISBLANK([Top 15 Marketplace Gap]), [Marketplace Avg MRP May 2022])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: 99bbca20-9d41-4891-a4a2-2549ba0df792
+
+	measure 'Top 15 Marketplace Lowest MRP' = IF(NOT ISBLANK([Top 15 Marketplace Gap]), [Product Lowest MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: d8730a42-39fb-4124-8937-5084e7b13a61
+
+	measure 'Top 12 Price Spread Amazon MRP' = IF(NOT ISBLANK([Top 12 Price Spread]), [Avg Amazon MRP])
+		formatString: \₹#,0
+		displayFolder: 7. Pricing
+		lineageTag: c415a8de-faab-4675-9c62-5c74b9a2e7ef
+
+	column 'Measure Group'
+		lineageTag: 9a483852-f297-4871-807a-9b9fbeac5a35
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Measure Group]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "Measure Group", STRING,
+				    {{"Sales"},{"International"},{"Financial"},{"Product"},{"Time"}}
+				)
+
+	annotation PBI_Id = f54bc43cf6d0407a8c162d606f2979ae
+

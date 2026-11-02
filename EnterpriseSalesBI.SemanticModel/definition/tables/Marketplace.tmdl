@@ -1,0 +1,28 @@
+table Marketplace
+	lineageTag: 7f269129-a242-40a5-a06d-6ba9f6ee2165
+
+	column Marketplace
+		lineageTag: 24f89dd0-20a0-4cc7-a54e-51c3baefabdb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Marketplace]
+		sortByColumn: 'Marketplace Order'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Marketplace Order'
+		isHidden
+		formatString: 0
+		lineageTag: cb22da63-41ad-4304-8be7-5a2465f111ed
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Marketplace Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Marketplace = calculated
+		mode: import
+		source = DATATABLE("Marketplace", STRING, "Marketplace Order", INTEGER, {{"Amazon", 1}, {"Amazon FBA", 2}, {"Flipkart", 3}, {"Myntra", 4}, {"Ajio", 5}, {"Snapdeal", 6}, {"Paytm", 7}, {"Limeroad", 8}})
+
+	annotation PBI_Id = 854d07de84144671b3e0c43b15cac8e2
+

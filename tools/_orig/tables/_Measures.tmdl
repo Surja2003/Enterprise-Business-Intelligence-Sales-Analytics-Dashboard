@@ -1,0 +1,262 @@
+table _Measures
+	lineageTag: bcf78b4e-11e7-4735-9f98-1d711ec06510
+
+	measure 'Amazon Revenue' =
+			
+			CALCULATE(
+			    SUM('Amazon Sale Report'[Amount]),
+			    'Amazon Sale Report'[Status]
+			        IN {
+			            "Shipped",
+			            "Shipped - Delivered to Buyer"
+			        }
+			)
+		lineageTag: d3f03cbb-b3aa-48d1-869e-dde0d957a462
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Amazon Units Sold' =
+			
+			CALCULATE(
+			    SUM('Amazon Sale Report'[Qty]),
+			    'Amazon Sale Report'[Status]
+			        IN {
+			            "Shipped",
+			            "Shipped - Delivered to Buyer"
+			        }
+			)
+		formatString: 0
+		lineageTag: 87ed23de-4caa-4d09-976d-1609c84df04a
+
+	measure 'Amazon Orders' =
+			
+			CALCULATE(
+			    DISTINCTCOUNT('Amazon Sale Report'[Order ID]),
+			    'Amazon Sale Report'[Status]
+			        IN {
+			            "Shipped",
+			            "Shipped - Delivered to Buyer"
+			        }
+			)
+		formatString: 0
+		lineageTag: bc88c913-49b2-435b-a3c1-b6abc37255db
+
+	measure 'International Revenue' =
+			
+			SUM('International sale Report'[GROSS AMT])
+		lineageTag: 9e3f7096-1a4f-412d-acac-8306bdecbac4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'International Units' =
+			
+			SUM('International sale Report'[PCS])
+		formatString: 0
+		lineageTag: 070ad3bd-79af-4a5c-b4d3-1e9bb77818a1
+
+	measure 'International Customers' =
+			
+			DISTINCTCOUNT('International sale Report'[CUSTOMER])
+		formatString: 0
+		lineageTag: a4650a23-7e35-4854-b54c-7f444e8f89a2
+
+	measure 'Total Recorded Expenses' =
+			
+			SUM('Expense IIGF'[Expense Amount])
+		formatString: 0
+		lineageTag: 86dbcd91-a5d4-44c1-abe6-9694bc29a81b
+
+	measure 'Total Received Amount' =
+			
+			SUM('Expense IIGF'[Received Amount])
+		formatString: 0
+		lineageTag: df9cf713-dbca-4ea7-ba25-abaaa302bfac
+
+	measure 'Amazon Revenue Previous Month' =
+			
+			CALCULATE(
+			    [Amazon Revenue],
+			    DATEADD(DimDate[Date], -1, MONTH)
+			)
+		lineageTag: 6f97545f-32ba-4cfd-8943-145a39cdc37b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Amazon Revenue MoM %' =
+			
+			DIVIDE(
+			    [Amazon Revenue] - [Amazon Revenue Previous Month],
+			    [Amazon Revenue Previous Month]
+			)
+		lineageTag: 47955bf1-bbcc-4e67-b9ff-3c7c24f7713e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'International Revenue Previous Month' =
+			
+			CALCULATE(
+			    [International Revenue],
+			    DATEADD(DimDate[Date], -1, MONTH)
+			)
+		lineageTag: 65899f8b-70c4-476b-a1bc-1f4470c0d415
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'International Revenue MoM %' =
+			
+			DIVIDE(
+			    [International Revenue] - [International Revenue Previous Month],
+			    [International Revenue Previous Month]
+			)
+		lineageTag: 098cd2d1-f65c-445f-bd90-9c23118e5d61
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Recorded Sales' = [Amazon Revenue] + [International Revenue]
+		lineageTag: 643ea736-e598-4034-b76a-283f99e22931
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Recorded Units' = [Amazon Units Sold] + [International Units]
+		formatString: 0
+		lineageTag: 5057f18e-ab95-4696-a16f-d2df8063b03f
+
+	measure 'Amazon Sales Share %' = DIVIDE([Amazon Revenue], [Total Recorded Sales])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 28280bd1-f898-4206-b454-a914f687c76f
+
+	measure 'International Sales Share %' = DIVIDE([International Revenue], [Total Recorded Sales])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 54995b0c-b23d-4bec-8d83-b33e946e6471
+
+	measure 'Total Sales Previous Month' = CALCULATE([Total Recorded Sales], DATEADD(DimDate[Date], -1, MONTH))
+		lineageTag: daa2030e-65ae-44b6-891a-d3169033d28c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Sales MoM %' = DIVIDE([Total Recorded Sales] - [Total Sales Previous Month], [Total Sales Previous Month])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 29208061-9d1f-4cf1-81b2-4570fabca775
+
+	measure 'Total Sales YTD' = TOTALYTD([Total Recorded Sales], DimDate[Date])
+		lineageTag: 769f4cb1-3fc6-4156-9df7-833d7f3670e0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Recorded Net Cash Position' = [Total Received Amount] - [Total Recorded Expenses]
+		formatString: 0
+		lineageTag: b964d7cf-ddbf-4f9c-ac2e-facd05245808
+
+	measure 'Net Profit Status' = "Not Available - COGS Data Required"
+		lineageTag: a77699e7-b10c-446a-92ba-90fef0bc3c5f
+
+	measure 'Amazon Average Order Value' = DIVIDE([Amazon Revenue], [Amazon Orders])
+		lineageTag: 094ec4c9-0e8e-46da-8f99-ccff31123827
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Amazon Average Selling Price' = DIVIDE([Amazon Revenue], [Amazon Units Sold])
+		lineageTag: e51fa9ff-044a-4f6c-80ce-e675eac2caf6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Amazon Previous Year Sales' = CALCULATE([Amazon Revenue], DATEADD(DimDate[Date], -1, YEAR))
+		lineageTag: 73e685cd-3da2-4a15-8062-729022ffabf1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Amazon YoY Growth %' = DIVIDE([Amazon Revenue] - [Amazon Previous Year Sales], [Amazon Previous Year Sales])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: bae64ca3-04fd-4e8c-8203-22234a266016
+
+	measure 'International Average Rate' = DIVIDE([International Revenue], [International Units])
+		lineageTag: dedff05b-e780-4640-a5fe-6c0ac3d93770
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'International Previous Year Sales' = CALCULATE([International Revenue], DATEADD(DimDate[Date], -1, YEAR))
+		lineageTag: fbb845d5-ca13-451d-a4fe-5411dfa4dafd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'International YoY Growth %' = DIVIDE([International Revenue] - [International Previous Year Sales], [International Previous Year Sales])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: a27d2a79-ad57-4e89-be29-ed97562c5055
+
+	measure 'Unique Catalog SKUs' = DISTINCTCOUNT('Sale Report'[SKU_Key])
+		formatString: 0
+		lineageTag: 8f989590-1242-4266-8175-ad27e96a04de
+
+	measure 'Total Stock' = SUM('Sale Report'[Stock])
+		formatString: 0
+		lineageTag: 0095859b-32cb-41a4-ace2-ce32300a6030
+
+	measure 'Amazon All Orders' = DISTINCTCOUNT('Amazon Sale Report'[Order ID])
+		formatString: 0
+		lineageTag: 8727be07-0e2a-4ad4-99cb-4cff738215ef
+
+	measure 'Amazon Cancelled Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status] = "Cancelled")
+		formatString: 0
+		lineageTag: a484148a-1057-48a2-9370-5959783ec328
+
+	measure 'Amazon Delivered Orders' = CALCULATE(DISTINCTCOUNT('Amazon Sale Report'[Order ID]), 'Amazon Sale Report'[Status] = "Shipped - Delivered to Buyer")
+		formatString: 0
+		lineageTag: c0669deb-763a-4bb3-86c1-1dc753393366
+
+	measure 'Amazon Cancellation Rate %' = DIVIDE([Amazon Cancelled Orders], [Amazon All Orders])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 875a5776-e7f0-4913-b75c-5780440a457f
+
+	measure 'Avg Amazon MRP' = AVERAGE('May-2022'[Amazon MRP])
+		lineageTag: a7857486-8b01-44ce-9303-0a3eec119e0c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Flipkart MRP' = AVERAGE('May-2022'[Flipkart MRP])
+		lineageTag: a2ff80fa-3b92-4376-acdc-fbcda28b000c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Myntra MRP' = AVERAGE('May-2022'[Myntra MRP])
+		lineageTag: 3d4f99d4-e43d-4989-a094-2bbe6767beb7
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Ajio MRP' = AVERAGE('May-2022'[Ajio MRP])
+		lineageTag: 346ef5c1-6673-4c2b-a63c-47ec2a90cdb6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Snapdeal MRP' = AVERAGE('May-2022'[Snapdeal MRP])
+		lineageTag: 3574fb44-33ff-4179-8f60-42db1f267e0b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Paytm MRP' = AVERAGE('May-2022'[Paytm MRP])
+		lineageTag: 78ce6d46-9728-42b7-9451-4dd1da224b11
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Avg Amazon MRP Mar2021' = AVERAGE('PL_March_2021'[Amazon MRP])
+		lineageTag: a31774d1-3bc1-4e90-913c-89514205bb5b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Measure Group'
+		lineageTag: 9a483852-f297-4871-807a-9b9fbeac5a35
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Measure Group]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "Measure Group", STRING,
+				    {{"Sales"},{"International"},{"Financial"},{"Product"},{"Time"}}
+				)
+
+	annotation PBI_Id = f54bc43cf6d0407a8c162d606f2979ae
+

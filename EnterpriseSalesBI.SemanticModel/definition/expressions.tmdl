@@ -1,0 +1,13 @@
+expression 'ER Wait Time Dataset' =
+		let
+		    Source = Csv.Document(File.Contents("C:\Data\SalesBI\ER Wait Time Dataset.csv"),[Delimiter=",", Columns=19, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Visit ID", type text}, {"Patient ID", type text}, {"Hospital ID", type text}, {"Hospital Name", type text}, {"Region", type text}, {"Visit Date", type datetime}, {"Day of Week", type text}, {"Season", type text}, {"Time of Day", type text}, {"Urgency Level", type text}, {"Nurse-to-Patient Ratio", Int64.Type}, {"Specialist Availability", Int64.Type}, {"Facility Size (Beds)", Int64.Type}, {"Time to Registration (min)", Int64.Type}, {"Time to Triage (min)", Int64.Type}, {"Time to Medical Professional (min)", Int64.Type}, {"Total Wait Time (min)", Int64.Type}, {"Patient Outcome", type text}, {"Patient Satisfaction", Int64.Type}})
+		in
+		    #"Changed Type"
+	lineageTag: 8328907c-4b80-4954-8ba0-2499f242280e
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

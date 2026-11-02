@@ -1,0 +1,63 @@
+table 'Expense IIGF'
+	lineageTag: c7ecffc5-336e-4abf-8601-9213baa8b161
+
+	column 'Received Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8561cf09-ecc3-4880-921c-e5ce9c045f75
+		summarizeBy: none
+		sourceColumn: Received Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Received Amount'
+		dataType: int64
+		formatString: 0
+		lineageTag: e849171c-119c-49a5-a1df-e8acf2da2abd
+		summarizeBy: sum
+		sourceColumn: Received Amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Expense Particular'
+		dataType: string
+		lineageTag: 6be10138-a44a-4298-91f8-3bcf66f85d09
+		summarizeBy: none
+		sourceColumn: Expense Particular
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Expense Amount'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4ee58b6b-ae77-4326-9af2-2496de243736
+		summarizeBy: sum
+		sourceColumn: Expense Amount
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Expense IIGF' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\Expense IIGF.csv"),[Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"index", Int64.Type}, {"Recived Amount", type text}, {"Unnamed: 1", type text}, {"Expance", type text}, {"Unnamed: 3", type text}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"Unnamed: 1", "Received Amount"}, {"Expance", "Expense Particular"}, {"Unnamed: 3", "Expense Amount"}, {"Recived Amount", "Received Date"}}),
+				    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Renamed Columns", {{"Received Date", type date}}, "en-US"),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Changed Type with Locale",{{"Expense Amount", Int64.Type}}),
+				    #"Removed Top Rows" = Table.Skip(#"Changed Type1",1),
+				    #"Removed Bottom Rows" = Table.RemoveLastN(#"Removed Top Rows",1),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Removed Bottom Rows",{{"Received Amount", Int64.Type}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type2",{"index"}),
+				    // The sheet ends with a subtotal row (blank particular, 8095) and a "Pending Amount" balancing row (-3095). Neither is an expense.
+				    #"Removed Summary Rows" = Table.SelectRows(#"Removed Columns", each [Expense Particular] <> null and Text.Trim([Expense Particular]) <> "" and Text.Trim([Expense Particular]) <> "Pending Amount")
+				in
+				    #"Removed Summary Rows"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

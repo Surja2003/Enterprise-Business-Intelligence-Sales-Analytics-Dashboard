@@ -1,0 +1,28 @@
+table Segment
+	lineageTag: 7d8aa35a-52d6-4918-aac7-a1da701c15ab
+
+	column Segment
+		lineageTag: d795e4de-4621-4bea-b201-919690e30623
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Segment]
+		sortByColumn: 'Segment Order'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Segment Order'
+		isHidden
+		formatString: 0
+		lineageTag: 46403fe4-3e3e-4ab9-9e91-7aa4d8164df2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Segment Order]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Segment = calculated
+		mode: import
+		source = DATATABLE("Segment", STRING, "Segment Order", INTEGER, {{"Amazon", 1}, {"International", 2}})
+
+	annotation PBI_Id = ef8c3abcd84e4e97a2d36fd07302fb8c
+

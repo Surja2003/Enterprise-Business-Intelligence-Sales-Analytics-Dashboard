@@ -1,0 +1,344 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "city",
+  "position": {
+    "x": 655,
+    "y": 676,
+    "z": 2900,
+    "height": 384,
+    "width": 403,
+    "tabOrder": 2900
+  },
+  "visual": {
+    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "query": {
+      "queryState": {
+        "dataset": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Amazon Sale Report"
+                    }
+                  },
+                  "Property": "ship-city"
+                }
+              },
+              "queryRef": "Amazon Sale Report.ship-city",
+              "nativeQueryRef": "ship-city"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Top 10 City Sales"
+                }
+              },
+              "queryRef": "_Measures.Top 10 City Sales",
+              "nativeQueryRef": "Top 10 City Sales"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "vega": [
+        {
+          "properties": {
+            "jsonSpec": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"$schema\": \"https://vega.github.io/schema/vega-lite/v6.json\", \"data\": {\"name\": \"dataset\"}, \"width\": \"container\", \"height\": \"container\", \"transform\": [{\"calculate\": \"''₹'' + (abs(datum[''Top 10 City Sales'']) >= 1e6 ? format(datum[''Top 10 City Sales''] / 1e6, ''.1f'') + ''M'' : abs(datum[''Top 10 City Sales'']) >= 1e3 ? format(datum[''Top 10 City Sales''] / 1e3, ''.0f'') + ''K'' : format(datum[''Top 10 City Sales''], '',.0f''))\", \"as\": \"Label\"}, {\"joinaggregate\": [{\"op\": \"max\", \"field\": \"Top 10 City Sales\", \"as\": \"peak\"}]}, {\"calculate\": \"datum[''Top 10 City Sales''] > 0.35 * datum.peak\", \"as\": \"Inside\"}], \"encoding\": {\"y\": {\"field\": \"ship-city\", \"type\": \"nominal\", \"sort\": {\"field\": \"Top 10 City Sales\", \"op\": \"max\", \"order\": \"descending\"}, \"title\": null, \"axis\": {\"labelLimit\": 110}}, \"x\": {\"field\": \"Top 10 City Sales\", \"type\": \"quantitative\", \"title\": null, \"axis\": null, \"scale\": {\"nice\": false}}, \"tooltip\": [{\"field\": \"ship-city\", \"title\": \"ship-city\"}, {\"field\": \"Label\", \"title\": \"Sales\"}]}, \"layer\": [{\"mark\": {\"type\": \"bar\", \"color\": \"#D6AC58\", \"cornerRadiusEnd\": 2, \"height\": {\"band\": 0.62}}}, {\"mark\": {\"type\": \"text\", \"align\": \"right\", \"dx\": -5, \"color\": \"#111111\", \"fontWeight\": 600}, \"encoding\": {\"text\": {\"field\": \"Label\"}, \"opacity\": {\"condition\": {\"test\": \"datum.Inside\", \"value\": 1}, \"value\": 0}}}, {\"mark\": {\"type\": \"text\", \"align\": \"left\", \"dx\": 5, \"color\": \"#A5A5A5\"}, \"encoding\": {\"text\": {\"field\": \"Label\"}, \"opacity\": {\"condition\": {\"test\": \"datum.Inside\", \"value\": 0}, \"value\": 1}}}]}'"
+                }
+              }
+            },
+            "jsonConfig": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"background\": \"transparent\", \"font\": \"Segoe UI\", \"padding\": 4, \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\"}, \"view\": {\"stroke\": \"transparent\"}, \"axis\": {\"labelColor\": \"#A5A5A5\", \"labelFontSize\": 10, \"titleColor\": \"#6E6E6E\", \"titleFontSize\": 10, \"titleFontWeight\": \"normal\", \"domain\": false, \"ticks\": false, \"grid\": false, \"labelPadding\": 6}, \"text\": {\"color\": \"#F2F2F2\", \"fontSize\": 10}, \"legend\": {\"disable\": true}}'"
+                }
+              }
+            },
+            "provider": {
+              "expr": {
+                "Literal": {
+                  "Value": "'vegaLite'"
+                }
+              }
+            },
+            "version": {
+              "expr": {
+                "Literal": {
+                  "Value": "'6.4.3'"
+                }
+              }
+            },
+            "enableTooltips": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableContextMenu": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableSelection": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top 10 cities'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F2F2F2'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Amazon recorded sales'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#6E6E6E'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#141414'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#262626'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "width": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

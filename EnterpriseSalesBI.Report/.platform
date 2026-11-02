@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "EnterpriseSalesBI"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "62693307-c917-4459-9ab4-cffaff9f1f19"
+  }
+}

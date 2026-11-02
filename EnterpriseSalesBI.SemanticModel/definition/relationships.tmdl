@@ -1,0 +1,32 @@
+relationship 4b71bc46-6f03-136a-939d-9bd55a322ea4
+	fromColumn: 'Amazon Sale Report'.SKU_Key
+	toColumn: DimSKU.SKU_Key
+
+relationship 683b4c1d-7a23-3cde-9b53-8ac4a53afbc4
+	fromColumn: 'Sale Report'.SKU_Key
+	toColumn: DimSKU.SKU_Key
+
+relationship a0da9c52-9092-dbd7-c4fb-2e1b7ee5d82c
+	fromColumn: 'International sale Report'.SKU_Key
+	toColumn: DimSKU.SKU_Key
+
+relationship aa3f8483-d543-7cbf-79f6-371c110bef82
+	fromColumn: 'Amazon Sale Report'.Date
+	toColumn: DimDate.Date
+
+relationship 0792dfbf-01f9-30b0-ec37-a212d8f08fd4
+	fromColumn: 'International sale Report'.DATE
+	toColumn: DimDate.Date
+
+relationship eb5442dd-0400-30ba-1a80-5986f57c5eae
+	fromColumn: May-2022.SKU_Key
+	toColumn: DimSKU.SKU_Key
+
+relationship 33368c3b-adaf-66a9-28aa-48a15fad47d2
+	fromColumn: PL_March_2021.SKU_Key
+	toColumn: DimSKU.SKU_Key
+
+relationship bff1c53b-255f-7c0a-11c1-d6a0c38ef4a7
+	fromColumn: 'Expense IIGF'.'Received Date'
+	toColumn: DimDate.Date
+

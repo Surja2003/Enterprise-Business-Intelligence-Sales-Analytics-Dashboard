@@ -1,0 +1,127 @@
+table 'Sale Report'
+	lineageTag: fb90e630-9373-4afb-a785-4d11ce16ec13
+
+	column SKU_Key
+		dataType: string
+		lineageTag: 483381a0-cf60-40a2-ad0c-e7cbc39d05d2
+		summarizeBy: none
+		sourceColumn: SKU_Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'SKU Code'
+		dataType: string
+		lineageTag: 87f80ca3-6ba9-489d-87fd-fb64f985049d
+		summarizeBy: none
+		sourceColumn: SKU Code
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Design No.'
+		dataType: string
+		lineageTag: e08d3dc9-c418-49a0-a330-9f3dbe1f26a4
+		summarizeBy: none
+		sourceColumn: Design No.
+
+		annotation SummarizationSetBy = Automatic
+
+	column Stock
+		dataType: int64
+		formatString: 0
+		lineageTag: bf8849de-7223-4a30-b27d-9cd01a2e867b
+		summarizeBy: sum
+		sourceColumn: Stock
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 9da6bf37-408b-458a-add3-c9be51fa6c4b
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Size
+		dataType: string
+		lineageTag: 4b75eabf-ca2c-4f51-ab6b-b31e171219d5
+		summarizeBy: none
+		sourceColumn: Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column Color
+		dataType: string
+		lineageTag: 907708ed-ef0a-47e7-bd11-a601a5acd61f
+		summarizeBy: none
+		sourceColumn: Color
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Sale Report' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\Sale Report.csv"),[Delimiter=",", Columns=7, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Custom1 = Table.TransformColumnTypes(
+				    Table.TransformColumns(
+				        #"Promoted Headers",
+				        {
+				            {"SKU Code", each if _ = null or Text.Trim(_) = "" then null else Text.Trim(_), type nullable text},
+				            {"Design No.", each if _ = null or Text.Trim(_) = "" then null else Text.Trim(_), type nullable text},
+				            {"Category", each if _ = null or Text.Trim(_) = "" then null else Text.Upper(Text.Trim(_)), type nullable text},
+				            {"Size", each if _ = null or Text.Trim(_) = "" then null else Text.Upper(Text.Trim(_)), type nullable text},
+				            {"Color", each if _ = null or Text.Trim(_) = "" then null else Text.Proper(Text.Trim(_)), type nullable text}
+				        }
+				    ),
+				    {
+				        {"Stock", Int64.Type}
+				    }
+				),
+				    Custom2 = Custom1,
+				    #"Removed Columns" = Table.RemoveColumns(Custom2,{"index"}),
+				    #"Added Custom" = Table.AddColumn(#"Removed Columns", "SKU_Key", each if [SKU] = null then null
+				else Text.Upper(
+				    Text.TrimEnd(
+				        Text.Trim(Text.Clean(Text.From([SKU]))),
+				        "."
+				    )
+				)),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Added Custom",{"SKU_Key"}),
+				    #"Added Custom1" = Table.AddColumn(#"Removed Columns1", "SKU_Key", each if [SKU Code] = null then null
+				else Text.Upper(
+				    Text.TrimEnd(
+				        Text.Trim(Text.Clean(Text.From([SKU Code]))),
+				        {"."}
+				    )
+				)),
+				    #"Trimmed Text" = Table.TransformColumns(#"Added Custom1",{{"SKU Code", Text.Trim, type text}}),
+				    #"Cleaned Text" = Table.TransformColumns(#"Trimmed Text",{{"SKU Code", Text.Clean, type text}}),
+				    #"Trimmed Text1" = Table.TransformColumns(#"Cleaned Text",{{"Design No.", Text.Trim, type text}}),
+				    #"Cleaned Text1" = Table.TransformColumns(#"Trimmed Text1",{{"Design No.", Text.Clean, type text}}),
+				    #"Trimmed Text2" = Table.TransformColumns(#"Cleaned Text1",{{"SKU_Key", Text.Trim, type text}}),
+				    #"Cleaned Text2" = Table.TransformColumns(#"Trimmed Text2",{{"SKU_Key", Text.Clean, type text}}),
+				    #"Uppercased Text" = Table.TransformColumns(#"Cleaned Text2",{{"SKU Code", Text.Upper, type text}, {"Design No.", Text.Upper, type text}, {"SKU_Key", Text.Upper, type text}}),
+				    #"Filtered Rows" = Table.SelectRows(#"Uppercased Text", each ([SKU Code] <> null)),
+				    #"Removed Columns2" = Table.RemoveColumns(#"Filtered Rows",{"SKU_Key"}),
+				    #"Added Custom2" = Table.AddColumn(#"Removed Columns2", "SKU_Key", each if [SKU Code] = null or [SKU Code] = "#REF!" then
+				    Text.Upper(
+				        Text.Combine(
+				            {
+				                Text.From([#"Design No."]),
+				                Text.From([Color]),
+				                Text.From([Size])
+				            },
+				            "-"
+				        )
+				    )
+				else
+				    Text.Upper(Text.Trim([SKU Code])))
+				in
+				    #"Added Custom2"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

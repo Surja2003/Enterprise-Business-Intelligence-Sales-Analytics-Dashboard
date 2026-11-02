@@ -1,0 +1,125 @@
+table DimDate
+	lineageTag: 8b0c8b7f-fb98-4967-937d-5764e2d933fd
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: General Date
+		lineageTag: 1bcfa4b0-584c-4613-abdb-39dc74f5b960
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		formatString: 0
+		lineageTag: feac077e-0b06-4316-bb2e-17884e70f47b
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Year]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		formatString: 0
+		lineageTag: 861843df-aad2-46ba-bbca-612b54254ae9
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Month Number]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		lineageTag: 0a9c3f92-13e5-4d15-a615-7f68f78a9ff7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Year'
+		lineageTag: 0eaa12fb-b332-470c-8111-dd447670d5a9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Year]
+		sortByColumn: 'Year Month Sort'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		lineageTag: 76544bbd-35cc-42eb-9fa7-bcc4398416b7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Quarter'
+		lineageTag: 361253a8-5c68-453a-ac53-f5917de6f54c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Quarter]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week Number'
+		formatString: 0
+		lineageTag: b0535d36-c22f-402e-8962-64550d8f0248
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Week Number]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Day
+		formatString: 0
+		lineageTag: e089091f-34e7-4f9f-a02d-0d8050d23dcb
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Day]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day Name'
+		lineageTag: a9d2c175-8205-4c14-9b0f-7176d78659ae
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day Name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Month Sort'
+		formatString: 0
+		lineageTag: f330bf93-1af7-446b-9834-2fa7cf7c3204
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Year Month Sort]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimDate = calculated
+		mode: import
+		source =
+				
+				ADDCOLUMNS(
+				    CALENDAR(
+				        DATE(2020, 1, 1),
+				        DATE(2026, 12, 31)
+				    ),
+				    "Year", YEAR([Date]),
+				    "Month Number", MONTH([Date]),
+				    "Month", FORMAT([Date], "MMM"),
+				    "Month Year", FORMAT([Date], "MMM yyyy"),
+				    "Quarter", "Q" & FORMAT([Date], "Q"),
+				    "Year Quarter",
+				        FORMAT([Date], "yyyy") & " Q"
+				            & FORMAT([Date], "Q"),
+				    "Week Number", WEEKNUM([Date], 2),
+				    "Day", DAY([Date]),
+				    "Day Name", FORMAT([Date], "ddd"),
+				    "Year Month Sort", YEAR([Date]) * 100 + MONTH([Date])
+				)
+
+	annotation PBI_Id = 85d20c0a083d47a48779c08d54650a2f
+

@@ -1,0 +1,85 @@
+table 'Cloud Warehouse Compersion Chart'
+	lineageTag: 19bae738-f666-47a8-9efb-7b50c49273e5
+
+	column 'Service / Process'
+		dataType: string
+		lineageTag: 5fc98e79-11c2-4260-b3e3-ff989b8478bb
+		summarizeBy: none
+		sourceColumn: Service / Process
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Shiprocket Price / Details'
+		dataType: string
+		lineageTag: 1a258efd-bb64-48a8-b1ff-664f4983ebe5
+		summarizeBy: none
+		sourceColumn: Shiprocket Price / Details
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'INCREFF Price / Details'
+		dataType: string
+		lineageTag: ebc6196a-2226-4613-8964-f615ac5c5f9e
+		summarizeBy: none
+		sourceColumn: INCREFF Price / Details
+
+		annotation SummarizationSetBy = Automatic
+
+	column Row
+		dataType: int64
+		formatString: 0
+		lineageTag: 594b1dac-a2ff-4499-b641-07372a7ba36e
+		summarizeBy: none
+		sourceColumn: Row
+
+		annotation SummarizationSetBy = Automatic
+
+	column Section
+		dataType: string
+		lineageTag: 6c74a092-29e0-4fcb-b862-47b1cf43fa05
+		summarizeBy: none
+		sourceColumn: Section
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: string
+		lineageTag: bfa186f2-fa13-40fc-839d-b7b377708c6c
+		summarizeBy: none
+		sourceColumn: Item
+
+		annotation SummarizationSetBy = Automatic
+
+	column Detail
+		dataType: string
+		lineageTag: c1225bab-3fd4-4115-b158-2ffd46ac39c5
+		summarizeBy: none
+		sourceColumn: Detail
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Cloud Warehouse Compersion Chart' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\Cloud Warehouse Compersion Chart.csv"),[Delimiter=",", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"index", Int64.Type}, {"Shiprocket", type text}, {"Unnamed: 1", type text}, {"INCREFF", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"index"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"Unnamed: 1", "Shiprocket Price / Details"}, {"INCREFF", "INCREFF Price / Details"}, {"Shiprocket", "Service / Process"}}),
+				    #"Removed Top Rows" = Table.Skip(#"Renamed Columns",1),
+				    // The source mixes a rate table with an indented scope-of-work list. Keep the raw columns, add a readable shape.
+				    Clean = (v) => if v = null then "" else Text.Combine(List.Select(Text.Split(Text.Trim(v), " "), each _ <> ""), " "),
+				    #"Added Row" = Table.AddIndexColumn(#"Removed Top Rows", "Row", 1, 1, Int64.Type),
+				    #"Added Section" = Table.AddColumn(#"Added Row", "Section", each if [Row] <= 4 then "Rates" else if Clean([#"Service / Process"]) = "" then null else Clean([#"Service / Process"]), type nullable text),
+				    #"Filled Section" = Table.FillDown(#"Added Section", {"Section"}),
+				    #"Added Item" = Table.AddColumn(#"Filled Section", "Item", each Clean([#"Shiprocket Price / Details"]), type text),
+				    #"Added Detail" = Table.AddColumn(#"Added Item", "Detail", each Clean([#"INCREFF Price / Details"]), type text),
+				    #"Removed Blank Rows" = Table.SelectRows(#"Added Detail", each [Item] <> "" or [Detail] <> "")
+				in
+				    #"Removed Blank Rows"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

@@ -1,0 +1,312 @@
+table 'International sale Report'
+	lineageTag: 2e948703-81d2-45be-9b9b-d6a1d87b4f36
+
+	column DATE
+		dataType: string
+		lineageTag: e67a6b9c-0b88-406f-9d98-6bf51b78310a
+		summarizeBy: none
+		sourceColumn: DATE
+
+		annotation SummarizationSetBy = Automatic
+
+	column Months
+		dataType: string
+		lineageTag: ddfc5ce7-0f8b-491b-9e0d-4636d6b0219e
+		summarizeBy: none
+		sourceColumn: Months
+
+		annotation SummarizationSetBy = Automatic
+
+	column CUSTOMER
+		dataType: string
+		lineageTag: 844285f9-7ddc-4634-b82e-c64cb5e4438f
+		summarizeBy: none
+		sourceColumn: CUSTOMER
+
+		annotation SummarizationSetBy = Automatic
+
+	column Style
+		dataType: string
+		lineageTag: a85e08a6-5762-4883-bc4d-402fef736082
+		summarizeBy: none
+		sourceColumn: Style
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKU
+		dataType: string
+		lineageTag: 4b61fa3e-50c1-4ed2-9f1a-8a8eb4ba4225
+		summarizeBy: none
+		sourceColumn: SKU
+
+		annotation SummarizationSetBy = Automatic
+
+	column Size
+		dataType: string
+		lineageTag: 409e284d-157e-41f2-a691-e7a976bf98d9
+		summarizeBy: none
+		sourceColumn: Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column PCS
+		dataType: int64
+		formatString: 0
+		lineageTag: 37f30f3c-53b9-49e2-9682-694fa00b86af
+		summarizeBy: sum
+		sourceColumn: PCS
+
+		annotation SummarizationSetBy = Automatic
+
+	column RATE
+		dataType: double
+		lineageTag: 5a0168ce-aaa1-4037-b20f-b0750768350b
+		summarizeBy: sum
+		sourceColumn: RATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'GROSS AMT'
+		dataType: double
+		lineageTag: f24cc443-f30f-4a71-923b-eec5b14f0acc
+		summarizeBy: sum
+		sourceColumn: GROSS AMT
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Final Size'
+		dataType: string
+		lineageTag: fb27a8d6-972d-4787-8df7-57a07b0057ed
+		summarizeBy: none
+		sourceColumn: Final Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Size Category'
+		dataType: string
+		lineageTag: 5c0c14cd-bb65-46ef-b93a-429fe2e0c47e
+		summarizeBy: none
+		sourceColumn: Size Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Corrected Size'
+		dataType: string
+		lineageTag: 0e0c2222-d72a-4d93-8c0e-a9bca08ae4c0
+		summarizeBy: none
+		sourceColumn: Corrected Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'SKU Size'
+		dataType: string
+		lineageTag: 72edd141-2283-4fdf-aae3-47197a8d6888
+		summarizeBy: none
+		sourceColumn: SKU Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Final Corrected Size'
+		dataType: string
+		lineageTag: 8968216a-0f13-44a8-8768-a5f4d6a01f98
+		summarizeBy: none
+		sourceColumn: Final Corrected Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Final Size Category'
+		dataType: string
+		lineageTag: ca48a662-c2b9-49be-986d-b18226104671
+		summarizeBy: none
+		sourceColumn: Final Size Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Calculated Gross'
+		dataType: string
+		lineageTag: 54583a9f-15af-497c-a3bf-a647421ff07e
+		summarizeBy: none
+		sourceColumn: Calculated Gross
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Amount Difference'
+		dataType: string
+		lineageTag: 5c3ff3e7-b554-42b7-b3a7-511c39dac894
+		summarizeBy: none
+		sourceColumn: Amount Difference
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Difference %'
+		dataType: string
+		lineageTag: 35768957-b161-4e11-8f38-ea25a4a107a8
+		summarizeBy: none
+		sourceColumn: Difference %
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Implied Discount %'
+		dataType: string
+		lineageTag: baf8a2da-7d91-435d-90ac-091076c13055
+		summarizeBy: none
+		sourceColumn: Implied Discount %
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKU_Key
+		dataType: string
+		lineageTag: fc828797-5cdb-45d2-b880-c14dfeefac09
+		summarizeBy: none
+		sourceColumn: SKU_Key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'International sale Report' = m
+		mode: import
+		source = ```
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\International sale Report.csv"),[Delimiter=",", Columns=10, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Use First Row as Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Change Type" = Table.TransformColumnTypes(#"Use First Row as Headers",{{"index", Int64.Type}, {"DATE", type text}, {"Months", type text}, {"CUSTOMER", type text}, {"Style", type text}, {"SKU", type text}, {"Size", type text}, {"PCS", type text}, {"RATE", type text}, {"GROSS AMT", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Change Type",{"index"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Columns",{{"PCS", Int64.Type}, {"RATE", type number}, {"GROSS AMT", type number}}),
+				    #"Added Custom4" = Table.AddColumn(#"Changed Type", "Corrected Size", each if [Size] = "1.00" then
+				    try Text.AfterDelimiter([SKU], "-", {0, RelativePosition.FromEnd})
+				    otherwise [Size]
+				else
+				    [Size]),
+				    #"Added Custom5" = Table.AddColumn(#"Added Custom4", "Final Size", each let
+				    s = Text.Upper(Text.Trim([Corrected Size])),
+				    cleaned = Text.TrimEnd(s, {".", " "})
+				in
+				    if List.Contains(
+				        {"XS","S","M","L","XL","XXL","XXXL","4XL","5XL","6XL"},
+				        cleaned
+				    )
+				    then cleaned
+				    else s),
+				    #"Added Custom6" = Table.AddColumn(#"Added Custom5", "Size Category", each let
+				    s = Text.Upper(Text.Trim([Final Size])),
+				    sizes = {
+				        "XS", "S", "M", "L", "XL",
+				        "XXL", "XXXL", "4XL", "5XL", "6XL"
+				    }
+				in
+				    if s = "" then "Blank"
+				    else if List.Contains(sizes, s) then "Clothing Size"
+				    else if (try Number.FromText(s) otherwise null) <> null
+				        then "Numeric - Review"
+				    else "Non-Size Entry"),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Added Custom6",{"Corrected Size"}),
+				    #"Added Custom7" = Table.AddColumn(#"Removed Columns1", "Corrected Size", each let
+				    s = if [Size] = null then "" 
+				        else Text.Upper(Text.Trim(Text.From([Size]))),
+				
+				    sku = if [SKU] = null then "" 
+				        else Text.Upper(Text.Trim([SKU])),
+				
+				    skuSize = try Text.AfterDelimiter(
+				        sku, "-", {0, RelativePosition.FromEnd}
+				    ) otherwise "",
+				
+				    validSizes = {
+				        "XS", "S", "M", "L", "XL",
+				        "XXL", "XXXL", "4XL", "5XL", "6XL"
+				    }
+				in
+				    if List.Contains(validSizes, s) then s
+				    else if 
+				        (try Number.FromText(s) otherwise null) <> null
+				        and List.Contains(validSizes, skuSize)
+				    then skuSize
+				    else s),
+				    #"Added Custom8" = Table.AddColumn(#"Added Custom7", "SKU Size", each let
+				    SKUValue = [SKU],
+				    LastPart =
+				        if SKUValue = null then null
+				        else Text.Upper(
+				            Text.TrimEnd(
+				                List.Last(Text.Split(Text.Trim(SKUValue), "-")),
+				                {".", " "}
+				            )
+				        )
+				in
+				    if List.Contains(
+				        {"XS", "S", "M", "L", "XL", "XXL", "XXXL", "XXXXL"},
+				        LastPart
+				    )
+				    then LastPart
+				    else null),
+				    #"Added Custom9" = Table.AddColumn(#"Added Custom8", "Final Corrected Size", each if [SKU Size] <> null then
+				    [SKU Size]
+				else
+				    [Corrected Size]),
+				    #"Added Custom10" = Table.AddColumn(#"Added Custom9", "Final Size Category", each if [SKU Size] <> null then
+				    "Clothing Size"
+				else if [Size Category] = "Numeric - Review" then
+				    "Numeric - Review"
+				else
+				    [Size Category]),
+				    #"Trimmed Text" = Table.TransformColumns(#"Added Custom10",{{"CUSTOMER", Text.Trim, type text}}),
+				    #"Cleaned Text" = Table.TransformColumns(#"Trimmed Text",{{"CUSTOMER", Text.Clean, type text}}),
+				    #"Trimmed Text1" = Table.TransformColumns(#"Cleaned Text",{{"Style", Text.Trim, type text}}),
+				    #"Cleaned Text1" = Table.TransformColumns(#"Trimmed Text1",{{"Style", Text.Clean, type text}}),
+				    #"Trimmed Text2" = Table.TransformColumns(#"Cleaned Text1",{{"SKU", Text.Trim, type text}}),
+				    #"Cleaned Text2" = Table.TransformColumns(#"Trimmed Text2",{{"SKU", Text.Clean, type text}}),
+				    #"Trimmed Text3" = Table.TransformColumns(#"Cleaned Text2",{{"Size", Text.Trim, type text}}),
+				    #"Cleaned Text3" = Table.TransformColumns(#"Trimmed Text3",{{"Size", Text.Clean, type text}}),
+				    #"Trimmed Text4" = Table.TransformColumns(#"Cleaned Text3",{{"Months", Text.Trim, type text}}),
+				    #"Cleaned Text4" = Table.TransformColumns(#"Trimmed Text4",{{"Months", Text.Clean, type text}}),
+				    #"Added Custom" = Table.AddColumn(#"Cleaned Text4", "Calculated Gross", each Number.Round([PCS] * [RATE], 0)),
+				    #"Added Custom1" = Table.AddColumn(#"Added Custom", "Amount Difference", each [GROSS AMT] - [Calculated Gross]),
+				    #"Added Custom2" = Table.AddColumn(#"Added Custom1", "Difference %", each if [Calculated Gross] = 0 then null
+				else
+				    Number.Round(
+				        ([GROSS AMT] - [Calculated Gross])
+				        / [Calculated Gross] * 100,
+				        2
+				    )),
+				    #"Added Custom3" = Table.AddColumn(#"Added Custom2", "Implied Discount %", each if [Calculated Gross] = 0 then null
+				else
+				    Number.Round(
+				        ([Calculated Gross] - [GROSS AMT])
+				        / [Calculated Gross] * 100,
+				        2
+				    )),
+				    #"Filtered Rows" = Table.SelectRows(
+				    #"Added Custom3",
+				    each
+				        let
+				            Difference = try Number.From([Amount Difference]) otherwise null
+				        in
+				            Difference <> null and Difference <> 0
+				),
+				    Custom1 = #"Filtered Rows",
+				    #"Added Custom11" = Table.AddColumn(Custom1, "Custom", each if [Sale Report.Size] <> null and [Amazon Sale Report.Size] <> null then "Matched in Both"
+				else if [Sale Report.Size] <> null then "Only in Sale Report"
+				else if [Amazon Sale Report.Size] <> null then "Only in Amazon"
+				else "Not Found in Either"),
+				    #"Added Custom12" = Table.AddColumn(#"Added Custom11", "SKU_Key", each if [SKU] = null then null
+				else Text.Upper(
+				    Text.TrimEnd(
+				        Text.Trim(Text.Clean(Text.From([SKU]))),
+				        "."
+				    )
+				)),
+				    #"Merged Queries" = Table.NestedJoin(#"Added Custom12", {"SKU_Key"}, #"Amazon Sale Report", {"SKU_Key"}, "Amazon Sale Report", JoinKind.LeftOuter),
+				    Custom3 = #"Merged Queries",
+				    #"Removed Columns3" = Table.RemoveColumns(Custom3,{"Custom"}),
+				    Custom2 = #"Removed Columns3"
+				in
+				    Custom2
+				```
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

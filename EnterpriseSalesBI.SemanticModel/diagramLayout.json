@@ -1,0 +1,190 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 244.66347765566695,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 853.85539097572439,
+            "y": 0
+          },
+          "nodeIndex": "May-2022",
+          "nodeLineageTag": "f70f01b4-dd43-4adc-a2d4-a6948cce36f3",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 730.81551561349943,
+            "y": 603.05337283868244
+          },
+          "nodeIndex": "International sale Report",
+          "nodeLineageTag": "2e948703-81d2-45be-9b9b-d6a1d87b4f36",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 9
+        },
+        {
+          "location": {
+            "x": 510.9349185985742,
+            "y": 0
+          },
+          "nodeIndex": "Expense IIGF",
+          "nodeLineageTag": "c7ecffc5-336e-4abf-8601-9213baa8b161",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 1581.8155156134997,
+            "y": 680.4414325401749
+          },
+          "nodeIndex": "Cloud Warehouse Compersion Chart",
+          "nodeLineageTag": "19bae738-f666-47a8-9efb-7b50c49273e5",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 1266.5916350164846,
+            "y": 0
+          },
+          "nodeIndex": "Amazon Sale Report",
+          "nodeLineageTag": "d25dd47c-77ef-4dcb-be1d-6cd1d878d799",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 1133.9326703184902,
+            "y": 644.776119402985
+          },
+          "nodeIndex": "Sale Report",
+          "nodeLineageTag": "fb90e630-9373-4afb-a785-4d11ce16ec13",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 445.85269240046318,
+            "y": 352.48937298650543
+          },
+          "nodeIndex": "DimSKU",
+          "nodeLineageTag": "3580b81b-d82f-462e-b0f8-3c72ec1491b9",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 1610.2489262580307,
+            "y": 17.910447761194028
+          },
+          "nodeIndex": "PL_March_2021",
+          "nodeLineageTag": "78df4693-e282-41ac-920d-7f4beed66bed",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 1448.3962338575675,
+            "y": 351.52668641934122
+          },
+          "nodeIndex": "DimDate",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 1708.3801886715105,
+            "y": 449.80426845265856
+          },
+          "nodeIndex": "_Measures",
+          "nodeLineageTag": "bcf78b4e-11e7-4735-9f98-1d711ec06510",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 10
+        },
+        {
+          "location": {
+            "x": 1546.5274962710473,
+            "y": 387.52668641934122
+          },
+          "nodeIndex": "Marketplace",
+          "nodeLineageTag": "63a13486-f024-4e4b-b5bf-d0fc6744a459",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1830.5274962710473,
+            "y": 387.52668641934122
+          },
+          "nodeIndex": "Segment",
+          "nodeLineageTag": "fa791a13-efb9-4b90-9d53-105d8eb4d1b5",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2114.5274962710473,
+            "y": 375.52668641934122
+          },
+          "nodeIndex": "Trend Grain",
+          "nodeLineageTag": "b7dc1f80-d467-42e0-816c-6dc6b0c95c53",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 67,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

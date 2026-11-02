@@ -1,0 +1,372 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "mrp",
+  "position": {
+    "x": 240,
+    "y": 232,
+    "z": 2000,
+    "height": 410,
+    "width": 1020,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "query": {
+      "queryState": {
+        "dataset": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Marketplace"
+                    }
+                  },
+                  "Property": "Marketplace"
+                }
+              },
+              "queryRef": "Marketplace.Marketplace",
+              "nativeQueryRef": "Marketplace"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Marketplace Min MRP"
+                }
+              },
+              "queryRef": "_Measures.Marketplace Min MRP",
+              "nativeQueryRef": "Marketplace Min MRP"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Marketplace Avg MRP May 2022"
+                }
+              },
+              "queryRef": "_Measures.Marketplace Avg MRP May 2022",
+              "nativeQueryRef": "Marketplace Avg MRP May 2022"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Marketplace Max MRP"
+                }
+              },
+              "queryRef": "_Measures.Marketplace Max MRP",
+              "nativeQueryRef": "Marketplace Max MRP"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "vega": [
+        {
+          "properties": {
+            "jsonSpec": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"$schema\": \"https://vega.github.io/schema/vega-lite/v6.json\", \"data\": {\"name\": \"dataset\"}, \"width\": \"container\", \"height\": \"container\", \"transform\": [{\"calculate\": \"''₹'' + format(datum[''Marketplace Min MRP''], '',.0f'')\", \"as\": \"Low\"}, {\"calculate\": \"''₹'' + format(datum[''Marketplace Avg MRP May 2022''], '',.0f'')\", \"as\": \"Avg\"}, {\"calculate\": \"''₹'' + format(datum[''Marketplace Max MRP''], '',.0f'')\", \"as\": \"High\"}], \"encoding\": {\"y\": {\"field\": \"Marketplace\", \"type\": \"nominal\", \"sort\": {\"field\": \"Marketplace Avg MRP May 2022\", \"order\": \"descending\"}, \"title\": null}, \"tooltip\": [{\"field\": \"Marketplace\", \"title\": \"Marketplace\"}, {\"field\": \"Low\", \"title\": \"Lowest MRP\"}, {\"field\": \"Avg\", \"title\": \"Average MRP\"}, {\"field\": \"High\", \"title\": \"Highest MRP\"}]}, \"layer\": [{\"mark\": {\"type\": \"rule\", \"color\": \"#3A3A3A\", \"strokeWidth\": 5, \"strokeCap\": \"round\"}, \"encoding\": {\"x\": {\"field\": \"Marketplace Min MRP\", \"type\": \"quantitative\", \"title\": \"MRP (₹)\", \"axis\": {\"format\": \",.0f\", \"grid\": true, \"gridColor\": \"#1F1F1F\", \"tickCount\": 8}}, \"x2\": {\"field\": \"Marketplace Max MRP\"}}}, {\"mark\": {\"type\": \"tick\", \"color\": \"#A5A5A5\", \"thickness\": 2, \"size\": 16}, \"encoding\": {\"x\": {\"field\": \"Marketplace Min MRP\", \"type\": \"quantitative\"}}}, {\"mark\": {\"type\": \"tick\", \"color\": \"#A5A5A5\", \"thickness\": 2, \"size\": 16}, \"encoding\": {\"x\": {\"field\": \"Marketplace Max MRP\", \"type\": \"quantitative\"}}}, {\"mark\": {\"type\": \"point\", \"filled\": true, \"color\": \"#D6AC58\", \"size\": 130, \"opacity\": 1}, \"encoding\": {\"x\": {\"field\": \"Marketplace Avg MRP May 2022\", \"type\": \"quantitative\"}}}, {\"mark\": {\"type\": \"text\", \"dy\": -14, \"color\": \"#D6AC58\", \"fontWeight\": 600}, \"encoding\": {\"x\": {\"field\": \"Marketplace Avg MRP May 2022\", \"type\": \"quantitative\"}, \"text\": {\"field\": \"Avg\"}}}]}'"
+                }
+              }
+            },
+            "jsonConfig": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"background\": \"transparent\", \"font\": \"Segoe UI\", \"padding\": 4, \"autosize\": {\"type\": \"fit\", \"contains\": \"padding\"}, \"view\": {\"stroke\": \"transparent\"}, \"axis\": {\"labelColor\": \"#A5A5A5\", \"labelFontSize\": 10, \"titleColor\": \"#6E6E6E\", \"titleFontSize\": 10, \"titleFontWeight\": \"normal\", \"domain\": false, \"ticks\": false, \"grid\": false, \"labelPadding\": 6}, \"text\": {\"color\": \"#F2F2F2\", \"fontSize\": 10}, \"legend\": {\"disable\": true}}'"
+                }
+              }
+            },
+            "provider": {
+              "expr": {
+                "Literal": {
+                  "Value": "'vegaLite'"
+                }
+              }
+            },
+            "version": {
+              "expr": {
+                "Literal": {
+                  "Value": "'6.4.3'"
+                }
+              }
+            },
+            "enableTooltips": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableContextMenu": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableSelection": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'MRP range by marketplace'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#F2F2F2'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI Semibold'"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'May 2022 lowest, average and highest. March 2021 is identical. Blank prices are excluded, not treated as zero.'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#6E6E6E'"
+                    }
+                  }
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "fontFamily": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Segoe UI'"
+                }
+              }
+            },
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'left'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#141414'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#262626'"
+                    }
+                  }
+                }
+              }
+            },
+            "radius": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "width": {
+              "expr": {
+                "Literal": {
+                  "Value": "1D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

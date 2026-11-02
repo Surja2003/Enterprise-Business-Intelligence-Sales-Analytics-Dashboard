@@ -1,0 +1,284 @@
+table 'Amazon Sale Report'
+	lineageTag: d25dd47c-77ef-4dcb-be1d-6cd1d878d799
+
+	column SKU_Key
+		dataType: string
+		lineageTag: 9db0fc07-3d83-4173-b8f4-fe3c7b0e3136
+		summarizeBy: none
+		sourceColumn: SKU_Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Order ID'
+		dataType: string
+		lineageTag: 39cf0b75-7706-428b-8b92-6efcea6bee5e
+		summarizeBy: none
+		sourceColumn: Order ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 645369b4-2d88-422d-9058-a3deb9267257
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Status
+		dataType: string
+		lineageTag: f9115fa7-41ca-452e-9e63-20a87c89d66e
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column Fulfilment
+		dataType: string
+		lineageTag: ac72a567-2086-468e-b0a4-d82871e99936
+		summarizeBy: none
+		sourceColumn: Fulfilment
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Sales Channel '
+		dataType: string
+		lineageTag: e5e75261-2442-4617-9c2c-0addf3fcf895
+		summarizeBy: none
+		sourceColumn: "Sales Channel "
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship-service-level
+		dataType: string
+		lineageTag: 34fa0dca-87cb-4a71-bee7-c8148da4b4f5
+		summarizeBy: none
+		sourceColumn: ship-service-level
+
+		annotation SummarizationSetBy = Automatic
+
+	column Style
+		dataType: string
+		lineageTag: 50141ad5-80de-4b1b-9f24-b7b4bc5b93ef
+		summarizeBy: none
+		sourceColumn: Style
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKU
+		dataType: string
+		lineageTag: d52c0de3-5129-4a11-86bf-72a02d113501
+		summarizeBy: none
+		sourceColumn: SKU
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 9bbc2e67-0da4-42d5-8026-a5cd5ad4479d
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Size
+		dataType: string
+		lineageTag: 4d11a0d6-45cf-4a43-a8ee-4c8fb37c3055
+		summarizeBy: none
+		sourceColumn: Size
+
+		annotation SummarizationSetBy = Automatic
+
+	column ASIN
+		dataType: string
+		lineageTag: 66def9f3-3691-41e6-bafc-00f6c7af877a
+		summarizeBy: none
+		sourceColumn: ASIN
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Courier Status'
+		dataType: string
+		lineageTag: 2885bc93-92c8-4d3b-9521-0b8e9d9e7856
+		summarizeBy: none
+		sourceColumn: Courier Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column Qty
+		dataType: int64
+		formatString: 0
+		lineageTag: d7685780-b000-4aa7-b7f6-ff4fd6d8cd26
+		summarizeBy: sum
+		sourceColumn: Qty
+
+		annotation SummarizationSetBy = Automatic
+
+	column currency
+		dataType: string
+		lineageTag: 7cc2b69e-2ffd-4b36-a38b-4187fc799492
+		summarizeBy: none
+		sourceColumn: currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column Amount
+		dataType: double
+		lineageTag: 18096d03-dbe0-4d4b-958e-4401ee5ea26d
+		summarizeBy: sum
+		sourceColumn: Amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ship-city
+		dataType: string
+		lineageTag: ba3fc322-9c3e-42bd-8fc0-586feab468b7
+		summarizeBy: none
+		sourceColumn: ship-city
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship-state
+		dataType: string
+		lineageTag: 7ae1e94a-482f-4cf7-a23d-4a4fda51e8e8
+		summarizeBy: none
+		sourceColumn: ship-state
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship-postal-code
+		dataType: string
+		lineageTag: b0e22966-16c5-45fa-a838-14fa344b31d2
+		summarizeBy: none
+		sourceColumn: ship-postal-code
+
+		annotation SummarizationSetBy = Automatic
+
+	column ship-country
+		dataType: string
+		lineageTag: ac64f7ec-2158-4ff6-9d03-e67fd5ee0178
+		summarizeBy: none
+		sourceColumn: ship-country
+
+		annotation SummarizationSetBy = Automatic
+
+	column promotion-ids
+		dataType: string
+		lineageTag: e82d6588-9c4a-400d-b974-95306591d25a
+		summarizeBy: none
+		sourceColumn: promotion-ids
+
+		annotation SummarizationSetBy = Automatic
+
+	column B2B
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 713d4a49-3676-46f0-92f5-c1d60f381948
+		summarizeBy: none
+		sourceColumn: B2B
+
+		annotation SummarizationSetBy = Automatic
+
+	column fulfilled-by
+		dataType: string
+		lineageTag: 084e364f-67a3-4c81-a404-40f001be8450
+		summarizeBy: none
+		sourceColumn: fulfilled-by
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Amazon Sale Report' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Data\SalesBI\Amazon Sale Report.csv"),[Delimiter=",", Columns=24, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"index", Int64.Type}, {"Order ID", type text}, {"Date", type text}, {"Status", type text}, {"Fulfilment", type text}, {"Sales Channel ", type text}, {"ship-service-level", type text}, {"Style", type text}, {"SKU", type text}, {"Category", type text}, {"Size", type text}, {"ASIN", type text}, {"Courier Status", type text}, {"Qty", Int64.Type}, {"currency", type text}, {"Amount", type number}, {"ship-city", type text}, {"ship-state", type text}, {"ship-postal-code", Int64.Type}, {"ship-country", type text}, {"promotion-ids", type text}, {"B2B", type logical}, {"fulfilled-by", type text}, {"Unnamed: 22", type text}}),
+				    #"Uppercased Text" = Table.TransformColumns(#"Changed Type",{{"ship-city", Text.Upper, type text}, {"ship-state", Text.Upper, type text}}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Uppercased Text",{{"ship-postal-code", type text}}),
+				    #"Trimmed Text" = Table.TransformColumns(#"Changed Type1",{{"ship-postal-code", Text.Trim, type text}}),
+				    #"Cleaned Text" = Table.TransformColumns(#"Trimmed Text",{{"ship-postal-code", Text.Clean, type text}}),
+				    Custom1 = Table.TransformColumns(
+				    #"Cleaned Text",
+				    {
+				        {
+				            "ship-city",
+				            each if _ = null or Text.Trim(_) = ""
+				                then null
+				                else Text.Trim(_),
+				            type nullable text
+				        },
+				        {
+				            "ship-state",
+				            each if _ = null or Text.Trim(_) = ""
+				                then null
+				                else Text.Trim(_),
+				            type nullable text
+				        }
+				    }
+				),
+				    Custom2 = Table.TransformColumns(
+				    #"Custom1",
+				    {
+				        {
+				            "ship-country",
+				            each if _ = null or Text.Trim(_) = ""
+				                then null
+				                else Text.Trim(_),
+				            type nullable text
+				        }
+				    }
+				),
+				    Custom3 = Custom2,
+				    #"Removed Columns" = Table.RemoveColumns(Custom3,{"Unnamed: 22", "index"}),
+				    #"Changed Type with Locale" = Table.TransformColumnTypes(#"Removed Columns", {{"Date", type date}}, "en-US"),
+				    #"Changed Type2" = Table.TransformColumnTypes(#"Changed Type with Locale",{{"Amount", type number}, {"Qty", Int64.Type}}),
+				    Custom4 = Table.TransformColumnTypes(
+				    #"Changed Type2",
+				    {
+				        {"Order ID", type text},
+				        {"Date", type date},
+				        {"Status", type text},
+				        {"Fulfilment", type text},
+				        {"Sales Channel", type text},
+				        {"ship-service-level", type text},
+				        {"Style", type text},
+				        {"SKU", type text},
+				        {"Category", type text},
+				        {"Size", type text},
+				        {"ASIN", type text},
+				        {"Courier Status", type text},
+				        {"Qty", Int64.Type},
+				        {"currency", type text},
+				        {"Amount", type number},
+				        {"ship-city", type text},
+				        {"ship-state", type text},
+				        {"ship-postal-code", type text},
+				        {"ship-country", type text},
+				        {"promotion-ids", type text},
+				        {"B2B", type logical},
+				        {"fulfilled-by", type text}
+				    },
+				    [MissingField = MissingField.Ignore]
+				),
+				    Custom5 = Custom4,
+				    #"Added Custom" = Table.AddColumn(Custom5, "SKU_Key", each if [SKU] = null then null
+				else Text.Upper(
+				    Text.TrimEnd(
+				        Text.Trim(Text.Clean(Text.From([SKU]))),
+				        "."
+				    )
+				)),
+				    #"Filtered Rows" = Table.SelectRows(#"Added Custom", each ([Status] = "Shipped" or [Status] = "Shipped - Delivered to Buyer"))
+				in
+				    #"Filtered Rows"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

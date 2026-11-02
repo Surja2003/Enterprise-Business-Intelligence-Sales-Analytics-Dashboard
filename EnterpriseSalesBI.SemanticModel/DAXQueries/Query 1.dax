@@ -1,0 +1,30 @@
+
+DimSKU =
+VAR AllSKUs =
+    UNION(
+        SELECTCOLUMNS(
+            'Amazon Sale Report',
+            "SKU_Key", UPPER(TRIM('Amazon Sale Report'[SKU_Key]))
+        ),
+        SELECTCOLUMNS(
+            'Sale Report',
+            "SKU_Key", UPPER(TRIM('Sale Report'[SKU_Key]))
+        ),
+        SELECTCOLUMNS(
+            'International sale Report',
+            "SKU_Key", UPPER(TRIM('International sale Report'[SKU_Key]))
+        ),
+        SELECTCOLUMNS(
+            'May-2022',
+            "SKU_Key", UPPER(TRIM('May-2022'[Sku]))
+        ),
+        SELECTCOLUMNS(
+            'P L March 2021',
+            "SKU_Key", UPPER(TRIM('P L March 2021'[Sku]))
+        )
+    )
+RETURN
+    FILTER(
+        DISTINCT(AllSKUs),
+        NOT ISBLANK([SKU_Key]) && [SKU_Key] <> ""
+    )
